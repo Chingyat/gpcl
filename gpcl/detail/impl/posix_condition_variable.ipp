@@ -1,0 +1,78 @@
+//
+// posix_condition_variable.ipp
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+// Copyright (c) 2020 Zhengyi Fu (tsingyat at outlook dot com)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+
+#include <gpcl/detail/error.hpp>
+#include <gpcl/detail/posix_clock.hpp>
+#include <gpcl/detail/posix_condition_variable.hpp>
+#include <gpcl/detail/posix_mutex.hpp>
+#include <gpcl/detail/posix_timer.hpp>
+#include <type_traits>
+
+#ifdef GPCL_POSIX
+#include <pthread.h>
+
+namespace gpcl {
+namespace detail {
+posix_condition_variable::posix_condition_variable() {
+  int err = pthread_cond_init(&cond_, nullptr);
+  if (err)
+    throw_system_error(err, "pthread_cond_init");
+}
+
+posix_condition_variable::~posix_condition_variable() {
+  int err = pthread_cond_destroy(&cond_);
+  GPCL_VERIFY(err == 0 && "failed to destroy the condition variable");
+}
+
+void posix_condition_variable::wait(pthread_mutex_t *lock) {
+  int err = pthread_cond_wait(&cond_, lock);
+  if (err == 0 || err == EAGAIN)
+    return;
+
+  throw_system_error(err, "pthread_cond_wait");
+}
+
+// returns false: no timeout
+// returns true: timeout
+bool posix_condition_variable::wait_until(pthread_mutex_t *lock,
+    const chrono::time_point<realtime_clock> &timeout_time) {
+  const auto ts = to_timespec(timeout_time.time_since_epoch());
+  int err = ::pthread_cond_timedwait(&cond_, lock, &ts);
+
+  if (err == ETIMEDOUT)
+    return true;
+
+  if (err)
+    throw_system_error(err, "pthread_cond_timedwait");
+
+  return false;
+}
+
+bool posix_condition_variable::wait_for(
+    pthread_mutex_t *lock, const chrono::nanoseconds &rel_time) {
+  return wait_until(lock, realtime_clock::now() + rel_time);
+}
+
+void posix_condition_variable::notify_one() {
+  int err = pthread_cond_signal(&cond_);
+  if (err)
+    throw_system_error(err, "pthread_cond_signal");
+}
+
+void posix_condition_variable::notify_all() {
+  int err = pthread_cond_broadcast(&cond_);
+  if (err)
+    throw_system_error(err, "pthread_cond_broadcast");
+}
+
+} // namespace detail
+} // namespace gpcl
+
+#endif
