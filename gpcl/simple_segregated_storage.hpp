@@ -20,14 +20,14 @@
 namespace gpcl {
 
 template <typename SizeType = std::size_t>
-class simple_segregated_storage
+class simple_segregated_storage : noncopyable
 {
 public:
   using size_type = SizeType;
 
   simple_segregated_storage() : free_list_() {}
 
-  ~simple_segregated_storage();
+  ~simple_segregated_storage() = default;
 
   static void *segregate(void *block, size_type sz, size_type partition_sz,
                          void *end = nullptr)
@@ -41,7 +41,7 @@ public:
     {
       *reinterpret_cast<void **>(reinterpret_cast<char *>(block) +
                                  partition_sz * i) =
-          reinterpret_cast<char *>(block) + partition_sz * i + 1;
+          reinterpret_cast<char *>(block) + partition_sz * (i + 1);
     }
     *reinterpret_cast<void **>(reinterpret_cast<char *>(block) +
                                partition_sz * (n - 1)) = end;
@@ -99,9 +99,42 @@ public:
     *reinterpret_cast<void **>(lower) = chunk;
   }
 
-  void *malloc_n(size_type n, size_type partition_sz);
-  void free_n(void *chunks, size_type n, size_type partition_sz);
-  void ordered_free_n(void *chunks, size_type n, size_type partition_sz);
+  void *malloc_n(size_type n, size_type partition_sz)
+  {
+    size_type m = 0;
+    void **p = reinterpret_cast<void **>(&free_list_);
+    void **s = p;
+    while (*p)
+    {
+      ++m;
+
+      if (m == n)
+      {
+        *s = *reinterpret_cast<void **>(*p);
+        return *s;
+      }
+
+      if (*reinterpret_cast<char **>(*p) - reinterpret_cast<char *>(*p) !=
+          partition_sz)
+      {
+        m = 0;
+        s = *reinterpret_cast<void ***>(*p);
+      }
+
+      p = *reinterpret_cast<void ***>(*p);
+    }
+    return nullptr;
+  }
+
+  void free_n(void *chunks, size_type n, size_type partition_sz)
+  {
+    add_block(chunks, n * partition_sz, partition_sz);
+  }
+
+  void ordered_free_n(void *chunks, size_type n, size_type partition_sz)
+  {
+    add_ordered_block(chunks, n * partition_sz, partition_sz);
+  }
 
 private:
   void *lower_bound(void *p)
@@ -114,7 +147,7 @@ private:
     while (next && next < p)
     {
       p1 = next;
-      void *next = *reinterpret_cast<void **>(p1);
+      next = *static_cast<void **>(p1);
     }
     return p1;
   }
