@@ -57,15 +57,10 @@ public:
   void add_ordered_block(void *const block, size_type sz,
                          size_type partition_sz)
   {
-    void *lower = lower_bound(block);
-    if (!lower)
-    {
-      free_list_ = segregate(block, sz, partition_sz);
-      return;
-    }
+    void **lower = lower_bound(block);
 
-    *reinterpret_cast<void **>(lower) =
-        segregate(block, sz, partition_sz, *reinterpret_cast<void **>(lower));
+    *lower =
+        segregate(block, sz, partition_sz, (*lower));
   }
 
   [[nodiscard]] bool empty() const { return free_list_ == nullptr; }
@@ -87,22 +82,15 @@ public:
 
   void ordered_free(void *const chunk)
   {
-    void *lower = lower_bound(chunk);
-    if (lower == nullptr)
-    {
-      *reinterpret_cast<void **>(chunk) = nullptr;
-      free_list_ = chunk;
-      return;
-    }
-
-    *reinterpret_cast<void **>(chunk) = *reinterpret_cast<void **>(lower);
-    *reinterpret_cast<void **>(lower) = chunk;
+    void **lower = lower_bound(chunk);
+    *reinterpret_cast<void **>(chunk) = (*lower);
+    *(lower) = chunk;
   }
 
   void *malloc_n(size_type n, size_type partition_sz)
   {
     size_type m = 0;
-    void **p = reinterpret_cast<void **>(&free_list_);
+    void **p = &free_list_;
     void **s = p;
     while (*p)
     {
@@ -110,18 +98,19 @@ public:
 
       if (m == n)
       {
+        auto ret = *s;
         *s = *reinterpret_cast<void **>(*p);
-        return *s;
+        return ret;
       }
 
       if (*reinterpret_cast<char **>(*p) - reinterpret_cast<char *>(*p) !=
           partition_sz)
       {
         m = 0;
-        s = *reinterpret_cast<void ***>(*p);
+        s = p;
       }
 
-      p = *reinterpret_cast<void ***>(*p);
+      p = &*reinterpret_cast<void **>(*p);
     }
     return nullptr;
   }
@@ -137,18 +126,18 @@ public:
   }
 
 private:
-  void *lower_bound(void *p)
+  // Returns the pointer to the last chunk that greater-equals p
+  void **lower_bound(void *p)
   {
     if (free_list_ == nullptr)
-      return free_list_;
+      return &free_list_;
 
-    void *p1 = free_list_;
-    void *next = *reinterpret_cast<void **>(p1);
-    while (next && next < p)
+    void **p1 = &free_list_;
+    while (*p1 && *reinterpret_cast<void **>(*p1) < p)
     {
-      p1 = next;
-      next = *static_cast<void **>(p1);
+      p1 = &*reinterpret_cast<void **>(*p1);
     }
+
     return p1;
   }
 
