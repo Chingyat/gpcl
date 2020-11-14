@@ -1,11 +1,11 @@
 # General Purpose C++ Libraries
 
+## Build status
 ![CMake](https://github.com/Chingyat/gpcl/workflows/CMake/badge.svg)
 
 ## Installation
 
-Copy files under `include` to somewhere your compiler can find or
-use cmake to install.
+Add this directory to your compiler's include path.
 
 ## Documentation
 
