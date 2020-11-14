@@ -11,7 +11,6 @@
 #ifndef GPCL_POOL_HPP
 #define GPCL_POOL_HPP
 
-#include <gpcl/default_malloc_free_user_allocator.hpp>
 #include <gpcl/detail/config.hpp>
 #include <gpcl/mutex.hpp>
 #include <gpcl/simple_segregated_storage.hpp>
@@ -32,7 +31,33 @@ struct is_user_allocator<
 {
 };
 
-template <typename UA = default_malloc_free_user_allocator,
+struct default_malloc_free_user_allocator
+{
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+
+  [[nodiscard]] static char *malloc(size_type sz)
+  {
+    return static_cast<char *>(std::malloc(sz));
+  }
+
+  static void free(char *p) noexcept { std::free(p); }
+};
+
+struct default_new_delete_user_allocator
+{
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+
+  [[nodiscard]] static char *malloc(size_type sz)
+  {
+    return reinterpret_cast<char *>(::operator new[](sz, std::nothrow));
+  }
+
+  static void free(char *p) noexcept { ::operator delete[](p, std::nothrow); }
+};
+
+template <typename UA = default_new_delete_user_allocator,
           typename MutexType = gpcl::mutex>
 class pool
 {

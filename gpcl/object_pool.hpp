@@ -11,7 +11,6 @@
 #ifndef GPCL_OBJECT_POOL_HPP
 #define GPCL_OBJECT_POOL_HPP
 
-#include <gpcl/default_malloc_free_user_allocator.hpp>
 #include <gpcl/detail/config.hpp>
 #include <gpcl/mutex.hpp>
 #include <gpcl/pool.hpp>
@@ -19,7 +18,7 @@
 
 namespace gpcl {
 
-template <typename T, typename UA = default_malloc_free_user_allocator,
+template <typename T, typename UA = default_new_delete_user_allocator,
           typename MutexType = gpcl::mutex>
 class object_pool
 {
