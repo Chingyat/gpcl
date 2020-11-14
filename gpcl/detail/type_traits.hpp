@@ -82,6 +82,49 @@ GPCL_CXX17_INLINE_CONSTEXPR bool is_convertible_v =
 template <typename T, typename U>
 GPCL_CXX17_INLINE_CONSTEXPR bool is_assignable_v = std::is_assignable<T, U>{};
 
+template <bool ...Bs>
+struct conjunction_helper;
+
+template <> struct conjunction_helper<> : std::true_type {};
+
+template <bool ...Bs>
+struct conjunction_helper<false, Bs...> : std::false_type {};
+
+template <bool ...Bs>
+struct conjunction_helper<true, Bs...> : conjunction_helper<Bs...> {};
+
+template <typename ...Ts>
+using conjunction = conjunction_helper<Ts::value...>;
+
+template <typename ...Ts>
+GPCL_CXX17_INLINE_CONSTEXPR bool conjunction_v = conjunction<Ts...>::value;
+
+template <bool ...Bs>
+struct disjunction_helper;
+
+template <> struct disjunction_helper<> : std::false_type {};
+
+template <bool ...Bs>
+struct disjunction_helper<true, Bs...> : std::true_type {};
+
+template <bool ...Bs>
+struct disjunction_helper<false, Bs...> : disjunction_helper<Bs...> {};
+
+template <typename ...Ts>
+using disjunction = disjunction_helper<Ts::value...>;
+
+template <typename ...Ts>
+GPCL_CXX17_INLINE_CONSTEXPR bool disjunction_v = disjunction<Ts...>::value;
+
+template <typename T>
+using negate = std::integral_constant<bool, !T::value>;
+
+template <typename T>
+GPCL_CXX17_INLINE_CONSTEXPR bool negate_v = negate<T>::value;
+
+template <bool C, typename T>
+using enable_if_t = typename std::enable_if<C, T>::type;
+
 } // namespace detail
 
 } // namespace gpcl
