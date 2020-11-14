@@ -125,12 +125,5 @@ set(GPCL_HEADERS
 add_library(gpcl ${GPCL_HEADERS} lib/src.cpp)
 target_include_directories(gpcl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-#add_subdirectory(lib gpcl)
-#add_subdirectory(bench)
-#add_subdirectory(tests)
-#add_subdirectory(examples)
-add_subdirectory(tools)
-#add_subdirectory(doc)
-
 install(DIRECTORY include/gpcl DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES include/gpcl.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
