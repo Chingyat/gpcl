@@ -49,7 +49,7 @@ public:
 
 private:
 #ifndef NDEBUG
-  bool locked_;
+  bool locked_{};
 #endif
 };
 
