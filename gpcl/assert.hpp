@@ -32,7 +32,7 @@
 /// \entity GPCL_ASSERT
 /// General purpose assertion
 
-/// Assertion used to verify postconditions
+/// Assertion used to verify post-conditions
 #define GPCL_VERIFY(...) \
   do { \
     [[maybe_unused]] auto _ = static_cast<bool>(__VA_ARGS__); \
@@ -43,6 +43,8 @@
 #define GPCL_VERIFY_(expected, expr) GPCL_VERIFY(expected == (expr))
 
 #define GPCL_VERIFY_0(expr) GPCL_VERIFY_(0, expr)
+
+#define GPCL_VERIFY_FALSE(expr) GPCL_VERIFY_(false, expr)
 
 /// Used to assert that the line cannot be reached
 #define GPCL_UNREACHABLE(msg) \

@@ -25,10 +25,20 @@ class simple_segregated_storage : noncopyable
 public:
   using size_type = SizeType;
 
+  /// Constructor.
   simple_segregated_storage() : free_list_() {}
 
+  /// Destructor.
   ~simple_segregated_storage() = default;
 
+  /// Segregates a memory block of size sz into as many partition_sz-sized
+  /// chunks as possible.
+  ///
+  /// @param block pointer to the block
+  /// @param sz size in bytes
+  /// @param partition_sz chunk size
+  /// @param end the last chunk's next ptr
+  /// @return pointer to the first chunk.
   static void *segregate(void *block, size_type sz, size_type partition_sz,
                          void *end = nullptr)
   {
@@ -49,6 +59,7 @@ public:
     return block;
   }
 
+  /// Segregates a memory block of size sz, and adds it to the free list.
   void add_block(void *block, size_type sz, size_type partition_sz)
   {
     free_list_ = segregate(block, sz, partition_sz, free_list_);
@@ -59,8 +70,7 @@ public:
   {
     void **lower = lower_bound(block);
 
-    *lower =
-        segregate(block, sz, partition_sz, (*lower));
+    *lower = segregate(block, sz, partition_sz, (*lower));
   }
 
   [[nodiscard]] bool empty() const { return free_list_ == nullptr; }
@@ -129,9 +139,6 @@ private:
   // Returns the pointer to the last chunk that greater-equals p
   void **lower_bound(void *p)
   {
-    if (free_list_ == nullptr)
-      return &free_list_;
-
     void **p1 = &free_list_;
     while (*p1 && *reinterpret_cast<void **>(*p1) < p)
     {
