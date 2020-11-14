@@ -234,7 +234,7 @@ public:
 
   static void *ordered_malloc(size_type n)
   {
-    return get_pool().orderded_malloc();
+    return get_pool().ordered_malloc(n);
   }
 
   static void free(void *ptr) { get_pool().free(ptr); }
