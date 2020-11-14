@@ -15,52 +15,64 @@
 #include <gpcl/narrow_cast.hpp>
 
 #ifdef GPCL_WINDOWS
-#include <Windows.h>
+#  include <Windows.h>
 
 extern "C" {
 WINBASEAPI void __stdcall InitializeConditionVariable(CONDITION_VARIABLE *);
 WINBASEAPI void __stdcall WakeConditionVariable(CONDITION_VARIABLE *);
 WINBASEAPI void __stdcall WakeAllConditionVariable(CONDITION_VARIABLE *);
-WINBASEAPI BOOL __stdcall SleepConditionVariableCS(
-    CONDITION_VARIABLE *, CRITICAL_SECTION *, DWORD);
+WINBASEAPI BOOL __stdcall SleepConditionVariableCS(CONDITION_VARIABLE *,
+                                                   CRITICAL_SECTION *, DWORD);
 }
 
 namespace gpcl {
 namespace detail {
 
-win_condition_variable::win_condition_variable() noexcept {
+win_condition_variable::win_condition_variable() noexcept
+{
   ::InitializeConditionVariable(&cv_);
 }
 
 win_condition_variable::~win_condition_variable() noexcept {}
 
-auto win_condition_variable::notify_one() -> void {
+auto win_condition_variable::notify_one() -> void
+{
   ::WakeConditionVariable(&cv_);
 }
 
-auto win_condition_variable::notify_all() -> void {
+auto win_condition_variable::notify_all() -> void
+{
   ::WakeAllConditionVariable(&cv_);
 }
 
-auto win_condition_variable::wait(LPCRITICAL_SECTION cs) -> void {
-  if (!::SleepConditionVariableCS(&cv_, cs, INFINITE))
+auto win_condition_variable::wait(unique_lock<win_mutex> &lock) -> void
+{
+  GPCL_ASSERT(lock.owns_lock());
+  if (!::SleepConditionVariableCS(&cv_, lock.mutex().native_handle(), INFINITE))
     throw_system_error("SleepConditionVariableCS");
 }
 
-bool win_condition_variable::wait_until(LPCRITICAL_SECTION cs,
-    const chrono::time_point<system_clock> &timeout_time) {
+bool win_condition_variable::wait_until(
+    unique_lock<win_mutex> &lock,
+    const chrono::time_point<system_clock> &timeout_time)
+{
   auto rel_time = timeout_time - system_clock::now();
-  if (rel_time.count() < 0) {
+  if (rel_time.count() < 0)
+  {
     rel_time = decltype(rel_time)(0);
   }
 
-  return wait_for(cs, rel_time);
+  return wait_for(lock, rel_time);
 }
 
-bool win_condition_variable::wait_for(
-    LPCRITICAL_SECTION cs, const chrono::nanoseconds &rel_time) {
+bool win_condition_variable::wait_for(unique_lock<win_mutex> &lock,
+                                      const chrono::nanoseconds &rel_time)
+{
+  GPCL_ASSERT(lock.owns_lock());
   const auto ms = chrono::duration_cast<chrono::milliseconds>(rel_time).count();
-  if (!::SleepConditionVariableCS(&cv_, cs, narrow_cast<DWORD>(ms))) {
+  if (!::SleepConditionVariableCS(&cv_, lock.mutex().native_handle(),
+                                  narrow_cast<DWORD>(ms)))
+  {
     DWORD dwError = ::GetLastError();
     if (dwError == ERROR_TIMEOUT)
       return true;

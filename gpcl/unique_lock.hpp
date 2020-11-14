@@ -46,8 +46,6 @@ class GPCL_SCOPED_CAPABILITY unique_lock
 public:
   using mutex_type = MutexType;
 
-  unique_lock() = default;
-
   explicit unique_lock(mutex_type &mtx) GPCL_ACQUIRE(mtx)
       : mtx_(&mtx),
         owns_lock_(false)
@@ -110,25 +108,21 @@ public:
 
   [[nodiscard]] auto owns_lock() const noexcept -> bool
   {
-    GPCL_ASSERT(!owns_lock_ || mutex());
     return owns_lock_;
   }
 
-  [[nodiscard]] mutex_type *mutex() const noexcept { return mtx_; }
+  [[nodiscard]] mutex_type &mutex() const noexcept { return *mtx_; }
 
-  auto release() noexcept -> mutex_type
+  auto release() noexcept -> void
   {
     owns_lock_ = false;
     auto ret = mtx_;
-    mtx_ = nullptr;
-    return mtx_;
   }
 
   GPCL_ACQUIRE() void lock()
   {
-    GPCL_ASSERT(mutex());
     GPCL_ASSERT(owns_lock_ == false);
-    mutex()->lock();
+    mutex().lock();
     owns_lock_ = true;
   }
 
@@ -137,17 +131,15 @@ public:
   GPCL_TRY_ACQUIRE(true)
   bool try_lock()
   {
-    GPCL_ASSERT(mutex());
     GPCL_ASSERT(owns_lock_ == false);
-    owns_lock_ = mutex()->try_lock();
+    owns_lock_ = mutex().try_lock();
     return owns_lock_;
   }
 
   GPCL_RELEASE() void unlock()
   {
-    GPCL_ASSERT(mutex());
     GPCL_ASSERT(owns_lock_);
-    mutex()->unlock();
+    mutex().unlock();
     owns_lock_ = false;
   }
 

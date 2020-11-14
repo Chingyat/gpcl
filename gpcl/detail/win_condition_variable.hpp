@@ -12,16 +12,19 @@
 #define GPCL_DETAIL_WIN_CONDITION_VARIABLE_HPP
 
 #include <gpcl/detail/config.hpp>
-#include <gpcl/noncopyable.hpp>
 #include <gpcl/detail/win_clock.hpp>
+#include <gpcl/detail/win_mutex.hpp>
+#include <gpcl/noncopyable.hpp>
+#include <gpcl/unique_lock.hpp>
 
 #ifdef GPCL_WINDOWS
-#include <Windows.h>
+#  include <Windows.h>
 
 namespace gpcl {
 namespace detail {
 
-class win_condition_variable : noncopyable {
+class win_condition_variable : noncopyable
+{
 public:
   using native_handle_type = PCONDITION_VARIABLE;
 
@@ -33,15 +36,16 @@ public:
 
   GPCL_DECL auto notify_all() -> void;
 
-  GPCL_DECL auto wait(LPCRITICAL_SECTION cs) -> void;
+  GPCL_DECL auto wait(unique_lock<win_mutex> &lock) -> void;
 
-  GPCL_DECL bool wait_until(LPCRITICAL_SECTION cs,
-      const chrono::time_point<system_clock> &timeout_time);
+  GPCL_DECL bool
+  wait_until(unique_lock<win_mutex> &lock,
+             const chrono::time_point<system_clock> &timeout_time);
 
   // false: timeout
   // true: no timeout
-  GPCL_DECL bool wait_for(
-      LPCRITICAL_SECTION cs, const chrono::nanoseconds &rel_time);
+  GPCL_DECL bool wait_for(unique_lock<win_mutex> &lock,
+                          const chrono::nanoseconds &rel_time);
 
   native_handle_type native_handle() { return &cv_; }
 
@@ -53,7 +57,7 @@ private:
 #endif
 
 #ifdef GPCL_HEADER_ONLY
-#include <gpcl/detail/impl/win_condition_variable.ipp>
+#  include <gpcl/detail/impl/win_condition_variable.ipp>
 #endif
 
 #endif

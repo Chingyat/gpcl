@@ -31,8 +31,9 @@ posix_condition_variable::~posix_condition_variable() {
   GPCL_VERIFY(err == 0 && "failed to destroy the condition variable");
 }
 
-void posix_condition_variable::wait(pthread_mutex_t *lock) {
-  int err = pthread_cond_wait(&cond_, lock);
+void posix_condition_variable::wait(gpcl::unique_lock<posix_normal_mutex> &lock) {
+  GPCL_ASSERT(lock.owns_lock());
+  int err = pthread_cond_wait(&cond_, lock.mutex().native_handle());
   if (err == 0 || err == EAGAIN)
     return;
 
@@ -41,10 +42,11 @@ void posix_condition_variable::wait(pthread_mutex_t *lock) {
 
 // returns false: no timeout
 // returns true: timeout
-bool posix_condition_variable::wait_until(pthread_mutex_t *lock,
+bool posix_condition_variable::wait_until(gpcl::unique_lock<posix_normal_mutex> &lock,
     const chrono::time_point<realtime_clock> &timeout_time) {
+  GPCL_ASSERT(lock.owns_lock());
   const auto ts = to_timespec(timeout_time.time_since_epoch());
-  int err = ::pthread_cond_timedwait(&cond_, lock, &ts);
+  int err = ::pthread_cond_timedwait(&cond_, lock.mutex().native_handle(), &ts);
 
   if (err == ETIMEDOUT)
     return true;
@@ -56,7 +58,7 @@ bool posix_condition_variable::wait_until(pthread_mutex_t *lock,
 }
 
 bool posix_condition_variable::wait_for(
-    pthread_mutex_t *lock, const chrono::nanoseconds &rel_time) {
+    gpcl::unique_lock<posix_normal_mutex> &lock, const chrono::nanoseconds &rel_time) {
   return wait_until(lock, realtime_clock::now() + rel_time);
 }
 

@@ -21,6 +21,8 @@
 
 namespace gpcl {
 
+class condition_variable;
+
 class GPCL_CAPABILITY("mutex") null_mutex : noncopyable
 {
 public:
@@ -84,6 +86,8 @@ public:
   }
 
 private:
+  friend class condition_variable;
+
   impl_type impl_;
 };
 
