@@ -16,17 +16,27 @@
 #include <gpcl/clock.hpp>
 #include <gpcl/condition_variable.hpp>
 #include <gpcl/creation_tag.hpp>
+#include <gpcl/default_malloc_free_user_allocator.hpp>
+#include <gpcl/detail>
 #include <gpcl/error.hpp>
 #include <gpcl/event.hpp>
 #include <gpcl/expected.hpp>
+#include <gpcl/expected_fwd.hpp>
+#include <gpcl/ext>
+#include <gpcl/ext.hpp>
+#include <gpcl/impl>
+#include <gpcl/in_place_t.hpp>
 #include <gpcl/is_basic_lockable.hpp>
 #include <gpcl/is_lockable.hpp>
 #include <gpcl/message_queue.hpp>
 #include <gpcl/mutex.hpp>
 #include <gpcl/narrow_cast.hpp>
 #include <gpcl/noncopyable.hpp>
+#include <gpcl/object_pool.hpp>
 #include <gpcl/offset_ptr.hpp>
 #include <gpcl/optional.hpp>
+#include <gpcl/optional_fwd.hpp>
+#include <gpcl/pool.hpp>
 #include <gpcl/semaphore.hpp>
 #include <gpcl/simple_segregated_storage.hpp>
 #include <gpcl/span.hpp>
@@ -38,5 +48,6 @@
 #include <gpcl/unique_lock.hpp>
 #include <gpcl/unique_resource.hpp>
 #include <gpcl/zstring.hpp>
+
 
 #endif // GPCL_HPP
