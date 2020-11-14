@@ -21,7 +21,6 @@
 #include <gpcl/event.hpp>
 #include <gpcl/expected.hpp>
 #include <gpcl/expected_fwd.hpp>
-#include <gpcl/ext.hpp>
 #include <gpcl/in_place_t.hpp>
 #include <gpcl/is_basic_lockable.hpp>
 #include <gpcl/is_lockable.hpp>
@@ -34,6 +33,7 @@
 #include <gpcl/optional.hpp>
 #include <gpcl/optional_fwd.hpp>
 #include <gpcl/pool.hpp>
+#include <gpcl/pool_allocator.hpp>
 #include <gpcl/semaphore.hpp>
 #include <gpcl/simple_segregated_storage.hpp>
 #include <gpcl/span.hpp>
