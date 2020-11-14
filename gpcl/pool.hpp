@@ -204,6 +204,48 @@ private:
   simple_segregated_storage<size_type> storage_;
 };
 
+template <typename Tag, unsigned RequestedSize,
+          typename UserAllocator = default_malloc_free_user_allocator>
+class singleton_pool
+{
+  using pool_type = pool<UserAllocator>;
+
+public:
+  using tag = Tag;
+  using user_allocator = UserAllocator;
+  using size_type = typename pool<UserAllocator>::size_type;
+  using difference_type = typename pool<UserAllocator>::difference_type;
+
+  const static unsigned requested_size = RequestedSize;
+
+  static void *malloc() { return get_pool().malloc(); }
+
+  static void *ordered_malloc() { return get_pool().ordered_malloc(); }
+
+  static void *ordered_malloc(size_type n)
+  {
+    return get_pool().orderded_malloc();
+  }
+
+  static void free(void *ptr) { get_pool().free(ptr); }
+
+  static void ordered_free(void *ptr) { get_pool().ordered_free(ptr); }
+
+  static void ordered_free(void *ptr, size_type n)
+  {
+    get_pool().ordered_free(ptr, n);
+  }
+
+private:
+  static pool_type &get_pool()
+  {
+    static pool_type instance(RequestedSize);
+    return instance;
+  }
+
+  pool_type &pool_ = get_pool();
+};
+
 } // namespace gpcl
 
 #endif // GPCL_POOL_HPP
