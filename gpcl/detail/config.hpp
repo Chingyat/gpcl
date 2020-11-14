@@ -79,6 +79,14 @@
 # endif
 #endif
 
+#ifndef GPCL_CXX17_IF_CONSTEXPR
+# if __cplusplus < 201703
+#  define GPCL_CXX17_IF_CONSTEXPR if
+# else
+#  define GPCL_CXX17_IF_CONSTEXPR if constexpr
+# endif
+#endif
+
 /// Main namespace of GPCL
 namespace gpcl {
 

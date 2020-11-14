@@ -30,15 +30,16 @@ inline mutable_buffer &operator+=(mutable_buffer &buf, std::size_t sz)
 }
 
 template <typename T>
-const_buffer buffer(const T &obj,
-                    std::enable_if_t<std::is_standard_layout_v<T>> * = nullptr)
+const_buffer
+buffer(const T &obj,
+       std::enable_if_t<std::is_standard_layout<T>::value> * = nullptr)
 {
   return const_buffer(reinterpret_cast<const char *>(obj), sizeof obj);
 }
 
 template <typename T>
 mutable_buffer
-buffer(T &obj, std::enable_if_t<std::is_standard_layout_v<T>> * = nullptr)
+buffer(T &obj, std::enable_if_t<std::is_standard_layout<T>::value> * = nullptr)
 {
   return mutable_buffer(reinterpret_cast<char *>(obj), sizeof obj);
 }

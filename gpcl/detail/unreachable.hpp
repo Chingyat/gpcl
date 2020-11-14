@@ -13,13 +13,13 @@
 
 #include <gpcl/detail/config.hpp>
 
-namespace gpcl::detail {
+namespace gpcl { namespace detail {
 
 [[noreturn]] GPCL_DECL void unreachable_internal(const char *msg = nullptr,
                                                  const char *file = nullptr,
                                                  unsigned line = 0) noexcept;
 
-} // namespace gpcl::detail
+} } // namespace gpcl::detail
 
 #ifdef GPCL_HEADER_ONLY
 #include <gpcl/detail/impl/unreachable.ipp>

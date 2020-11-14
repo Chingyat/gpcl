@@ -25,7 +25,7 @@ struct unexpect_t
   explicit unexpect_t() = default;
 };
 
-inline constexpr unexpect_t unexpect{};
+GPCL_CXX17_INLINE_CONSTEXPR unexpect_t unexpect{};
 
 template <typename E>
 class unexpected
@@ -145,8 +145,8 @@ public:
 
   GPCL_DECL_INLINE constexpr unexpected &
   operator=(const unexpected &) = default;
-  GPCL_DECL_INLINE constexpr unexpected &
-  operator=(unexpected &&) noexcept(std::is_nothrow_swappable_v<E>) = default;
+  GPCL_DECL_INLINE constexpr unexpected &operator=(unexpected &&) noexcept(
+      detail::is_nothrow_swappable<E>::value) = default;
 
   template <typename Err,
             std::enable_if_t<
@@ -194,7 +194,7 @@ public:
   GPCL_DECL_INLINE constexpr E &&value() && { return detail::move(val_); }
 
   GPCL_DECL_INLINE void
-  swap(unexpected &other) noexcept(std::is_nothrow_swappable_v<E>)
+  swap(unexpected &other) noexcept(detail::is_nothrow_swappable<E>::value)
   {
     using std::swap;
     swap(val_, other.val_);
@@ -206,10 +206,10 @@ template <typename E>
 unexpected(E) -> unexpected<E>;
 #endif
 
-template <typename E, std::enable_if_t<std::is_swappable_v<E>, int>>
+template <typename E, std::enable_if_t<detail::is_swappable<E>::value, int>>
 GPCL_DECL_INLINE void
 swap(unexpected<E> &lhs,
-     unexpected<E> &rhs) noexcept(std::is_nothrow_swappable_v<E>)
+     unexpected<E> &rhs) noexcept(detail::is_nothrow_swappable<E>::value)
 {
   lhs.swap(rhs);
 }
@@ -218,6 +218,16 @@ template <typename E>
 unexpected<typename std::decay<E>::type> make_unexpected(E &&e)
 {
   return unexpected<typename std::decay<E>::type>(std::forward<E>(e));
+}
+
+template <typename ErrC>
+unexpected<error_code> make_unexpected_error_code(ErrC e)
+{
+  static_assert(std::is_error_code_enum<ErrC>() ||
+                    std::is_error_condition_enum<ErrC>(),
+                "ErrC shall be error code enum");
+  using std::make_error_code;
+  return make_unexpected(make_error_code(e));
 }
 
 } // namespace gpcl

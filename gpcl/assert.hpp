@@ -33,11 +33,12 @@
 /// General purpose assertion
 
 /// Assertion used to verify post-conditions
-#define GPCL_VERIFY(...) \
-  do { \
-    [[maybe_unused]] auto _ = static_cast<bool>(__VA_ARGS__); \
-    GPCL_ASSERT(_ &&#__VA_ARGS__); \
-    (void)_; \
+#define GPCL_VERIFY(...)                                                       \
+  do                                                                           \
+  {                                                                            \
+    auto _ = static_cast<bool>(__VA_ARGS__);                                   \
+    GPCL_ASSERT(_ &&#__VA_ARGS__);                                             \
+    (void)_;                                                                   \
   } while (false)
 
 #define GPCL_VERIFY_(expected, expr) GPCL_VERIFY(expected == (expr))
@@ -47,7 +48,7 @@
 #define GPCL_VERIFY_FALSE(expr) GPCL_VERIFY_(false, expr)
 
 /// Used to assert that the line cannot be reached
-#define GPCL_UNREACHABLE(msg) \
+#define GPCL_UNREACHABLE(msg)                                                  \
   ::gpcl::detail::unreachable_internal(msg, __FILE__, __LINE__)
 
 /// Indicates that the function is not implemented yet

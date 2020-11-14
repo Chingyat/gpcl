@@ -12,16 +12,24 @@
 #define GPCL_DETAIL_TYPE_TRAITS_HPP
 
 #include <gpcl/detail/config.hpp>
+#include <gpcl/detail/utility.hpp>
 #include <type_traits>
 
 namespace gpcl {
 namespace detail {
 
-#define GPCL_TYPE_TRAITS_TREAT_VOID_AS_FALSE(name_part) \
-  template <typename T, bool = std::is_void<T>::value> struct name_part; \
-  template <typename T> struct name_part<T, true> : std::false_type {}; \
-  template <typename T> struct name_part<T, false> : std::name_part<T> {}; \
-  template <typename T> \
+#define GPCL_TYPE_TRAITS_TREAT_VOID_AS_FALSE(name_part)                        \
+  template <typename T, bool = std::is_void<T>::value>                         \
+  struct name_part;                                                            \
+  template <typename T>                                                        \
+  struct name_part<T, true> : std::false_type                                  \
+  {                                                                            \
+  };                                                                           \
+  template <typename T>                                                        \
+  struct name_part<T, false> : std::name_part<T>                               \
+  {                                                                            \
+  };                                                                           \
+  template <typename T>                                                        \
   GPCL_CXX17_INLINE_CONSTEXPR bool name_part##_v = name_part<T>{};
 
 GPCL_TYPE_TRAITS_TREAT_VOID_AS_FALSE(is_default_constructible)
@@ -44,19 +52,40 @@ GPCL_TYPE_TRAITS_TREAT_VOID_AS_FALSE(is_trivially_destructible)
 
 #undef GPCL_TYPE_TRAITS_TREAT_VOID_AS_FALSE
 
-template <typename T> struct is_char_like_type : std::false_type {};
+template <typename T>
+struct is_char_like_type : std::false_type
+{
+};
 
-template <> struct is_char_like_type<char> : std::true_type {};
+template <>
+struct is_char_like_type<char> : std::true_type
+{
+};
 
-template <> struct is_char_like_type<unsigned char> : std::true_type {};
+template <>
+struct is_char_like_type<unsigned char> : std::true_type
+{
+};
 
-template <> struct is_char_like_type<signed char> : std::true_type {};
+template <>
+struct is_char_like_type<signed char> : std::true_type
+{
+};
 
-template <> struct is_char_like_type<wchar_t> : std::true_type {};
+template <>
+struct is_char_like_type<wchar_t> : std::true_type
+{
+};
 
-template <> struct is_char_like_type<char16_t> : std::true_type {};
+template <>
+struct is_char_like_type<char16_t> : std::true_type
+{
+};
 
-template <> struct is_char_like_type<char32_t> : std::true_type {};
+template <>
+struct is_char_like_type<char32_t> : std::true_type
+{
+};
 
 template <typename T>
 GPCL_CXX17_INLINE_CONSTEXPR bool is_char_like_type_v = is_char_like_type<T>{};
@@ -82,38 +111,52 @@ GPCL_CXX17_INLINE_CONSTEXPR bool is_convertible_v =
 template <typename T, typename U>
 GPCL_CXX17_INLINE_CONSTEXPR bool is_assignable_v = std::is_assignable<T, U>{};
 
-template <bool ...Bs>
+template <bool... Bs>
 struct conjunction_helper;
 
-template <> struct conjunction_helper<> : std::true_type {};
+template <>
+struct conjunction_helper<> : std::true_type
+{
+};
 
-template <bool ...Bs>
-struct conjunction_helper<false, Bs...> : std::false_type {};
+template <bool... Bs>
+struct conjunction_helper<false, Bs...> : std::false_type
+{
+};
 
-template <bool ...Bs>
-struct conjunction_helper<true, Bs...> : conjunction_helper<Bs...> {};
+template <bool... Bs>
+struct conjunction_helper<true, Bs...> : conjunction_helper<Bs...>
+{
+};
 
-template <typename ...Ts>
+template <typename... Ts>
 using conjunction = conjunction_helper<Ts::value...>;
 
-template <typename ...Ts>
+template <typename... Ts>
 GPCL_CXX17_INLINE_CONSTEXPR bool conjunction_v = conjunction<Ts...>::value;
 
-template <bool ...Bs>
+template <bool... Bs>
 struct disjunction_helper;
 
-template <> struct disjunction_helper<> : std::false_type {};
+template <>
+struct disjunction_helper<> : std::false_type
+{
+};
 
-template <bool ...Bs>
-struct disjunction_helper<true, Bs...> : std::true_type {};
+template <bool... Bs>
+struct disjunction_helper<true, Bs...> : std::true_type
+{
+};
 
-template <bool ...Bs>
-struct disjunction_helper<false, Bs...> : disjunction_helper<Bs...> {};
+template <bool... Bs>
+struct disjunction_helper<false, Bs...> : disjunction_helper<Bs...>
+{
+};
 
-template <typename ...Ts>
+template <typename... Ts>
 using disjunction = disjunction_helper<Ts::value...>;
 
-template <typename ...Ts>
+template <typename... Ts>
 GPCL_CXX17_INLINE_CONSTEXPR bool disjunction_v = disjunction<Ts...>::value;
 
 template <typename T>
@@ -124,6 +167,36 @@ GPCL_CXX17_INLINE_CONSTEXPR bool negate_v = negate<T>::value;
 
 template <bool C, typename T>
 using enable_if_t = typename std::enable_if<C, T>::type;
+
+template <typename...>
+using void_t = void;
+
+template <typename T, typename U = T, typename = void>
+struct is_swappable : std::false_type
+{
+};
+
+template <typename T, typename U>
+struct is_swappable<
+    T, U, void_t<decltype(swap(std::declval<T &>(), std::declval<U &>()))>>
+    : std::true_type
+{
+};
+
+template <typename T, typename U = T, bool = is_swappable<T, U>::value>
+struct is_nothrow_swappable;
+
+template <typename T, typename U>
+struct is_nothrow_swappable<T, U, false> : std::false_type
+{
+};
+
+template <typename T, typename U>
+struct is_nothrow_swappable<T, U, true>
+    : std::integral_constant<bool, noexcept(swap(std::declval<T &>(),
+                                                 std::declval<U &>()))>
+{
+};
 
 } // namespace detail
 

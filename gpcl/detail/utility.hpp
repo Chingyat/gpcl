@@ -15,7 +15,7 @@
 #include <gpcl/detail/error.hpp>
 #include <gpcl/narrow_cast.hpp>
 
-namespace gpcl::detail {
+namespace gpcl { namespace detail {
 
 template <typename T, typename U>
 inline constexpr T &&forward(U &&expr) noexcept
@@ -37,6 +37,8 @@ inline constexpr T exchange(T &obj, U &&new_value)
   return old_value;
 }
 
-} // namespace gpcl::detail
+using std::swap;
+
+} } // namespace gpcl::detail
 
 #endif

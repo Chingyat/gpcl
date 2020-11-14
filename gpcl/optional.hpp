@@ -322,7 +322,9 @@ public:
   /// @}
 };
 
+#if __cplusplus >= 201703
 template <typename T> optional(T) -> optional<T>;
+#endif
 
 template <typename T>
 constexpr optional<typename std::decay<T>::type> make_optional(T &&x) {

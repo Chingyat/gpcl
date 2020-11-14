@@ -33,5 +33,6 @@ BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
 AlwaysBreakTemplateDeclarations: Yes
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
+IndentPPDirectives: AfterHash
 
 # vim:set filetype=yaml:

@@ -16,8 +16,11 @@
 #include <gpcl/detail/type_traits.hpp>
 #include <gpcl/detail/utility.hpp>
 #include <array>
-#include <string_view>
 #include <vector>
+
+#if __cplusplus >= 201703
+#  include <string_view>
+#endif
 
 namespace gpcl {
 
@@ -45,7 +48,7 @@ class static_span_base
   T *p_{};
 
 public:
-  inline static constexpr std::size_t extent = S;
+  static const std::size_t extent = S;
 
 public:
   template <bool C = S == 0, std::enable_if_t<C, int> = 0>
@@ -56,11 +59,11 @@ public:
   constexpr static_span_base(const static_span_base &) = default;
   constexpr static_span_base &operator=(const static_span_base &) = default;
 
-  constexpr static_span_base(T *p,
-                             [[maybe_unused]] std::size_t s) /* noexcept */
+  constexpr static_span_base(T *p, std::size_t s) /* noexcept */
       : p_(p)
   {
     GPCL_ASSERT(s == extent);
+    (void)s;
   }
 
   [[nodiscard]] constexpr T *data_() const noexcept { return p_; }
@@ -68,12 +71,13 @@ public:
 };
 
 template <typename T, std::size_t E>
-using span_base = std::conditional_t<E == std::size_t(-1), detail::dynamic_span_base<T>,
-                                     detail::static_span_base<T, E>>;
+using span_base =
+    std::conditional_t<E == std::size_t(-1), detail::dynamic_span_base<T>,
+                       detail::static_span_base<T, E>>;
 
 } // namespace detail
 
-inline constexpr std::size_t dynamic_extent = -1;
+GPCL_CXX17_INLINE_CONSTEXPR std::size_t dynamic_extent = -1;
 
 template <typename T, std::size_t E = dynamic_extent>
 class span;
@@ -103,9 +107,10 @@ public:
   {
   }
 
-  template <typename It, typename End,
-            std::enable_if_t<!std::is_convertible_v<End, std::size_t>, int> =
-                0> // requires ContiguousIterator<It>
+  template <
+      typename It, typename End,
+      std::enable_if_t<detail::negate_v<std::is_convertible<End, std::size_t>>,
+                       int> = 0> // requires ContiguousIterator<It>
   GPCL_DECL_INLINE constexpr span(It first, End last)
       : base_type(std::addressof(*first),
                   std::addressof(*last) - std::addressof(*first))
@@ -243,8 +248,7 @@ public:
   }
 
   template <
-      std::size_t Offset,
-      std::size_t Count = dynamic_extent,
+      std::size_t Offset, std::size_t Count = dynamic_extent,
       std::size_t Extent = std::conditional_t<
           (Count != dynamic_extent), std::integral_constant<std::size_t, Count>,
           std::conditional_t<
@@ -262,7 +266,7 @@ public:
   template <typename U = T, std::size_t N>
   GPCL_DECL_INLINE constexpr bool operator==(span<U, N> other) const
   {
-    static_assert(std::is_same_v<std::decay_t<U>, value_type>);
+    static_assert(std::is_same<std::decay_t<U>, value_type>{}, "");
     return std::equal(begin(), end(), other.begin(), other.end());
   }
 
@@ -275,7 +279,7 @@ public:
   template <typename U = T, std::size_t N>
   GPCL_DECL_INLINE constexpr bool operator<(span<U, N> other) const
   {
-    static_assert(std::is_same_v<std::decay_t<U>, value_type>);
+    static_assert(std::is_same<std::decay_t<U>, value_type>{},"");
     return std::lexicographical_compare(begin(), end(), other.begin(),
                                         other.end());
   }
@@ -307,13 +311,17 @@ public:
     return std::vector<value_type, Allocator>(begin(), end(), alloc);
   }
 
+#if __cplusplus >= 201703L
   template <typename U = value_type,
             std::enable_if_t<detail::is_char_like_type_v<U>, int> = 0>
   [[nodiscard]] std::basic_string_view<U> to_string_view() const
   {
     return std::basic_string_view<U>(data(), size());
   }
+#endif
 };
+
+#if __cplusplus >= 201703
 
 template <typename T, std::size_t N>
 span(T (&)[N]) -> span<T, N>;
@@ -326,6 +334,8 @@ span(It, EndOrSize) -> span<typename std::iterator_traits<It>::reference>;
 
 template <typename T, std::size_t N>
 span(const std::array<T, N> &) -> span<const T, N>;
+
+#endif
 
 template <typename T, std::size_t N>
 [[nodiscard]] GPCL_DECL_INLINE auto as_bytes(span<T, N> s) noexcept

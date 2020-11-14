@@ -75,9 +75,6 @@ private:
   impl_type impl_;
 };
 
-static_assert(::std::is_move_constructible<thread>());
-static_assert(::std::is_move_assignable<thread>());
-
 #endif
 
 namespace this_thread {

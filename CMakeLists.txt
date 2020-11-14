@@ -120,7 +120,9 @@ set(GPCL_HEADERS
         gpcl/message_queue.hpp
         gpcl/creation_tag.hpp
         gpcl/ext.hpp
-        gpcl/buffer.hpp gpcl/simple_segregated_storage.hpp)
+        gpcl/buffer.hpp
+        gpcl/simple_segregated_storage.hpp
+        gpcl/pool_allocator.hpp)
 
 add_library(gpcl ${GPCL_HEADERS} lib/src.cpp)
 target_include_directories(gpcl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -98,11 +98,11 @@ public:
 
   GPCL_DECL_INLINE ~expected_destruct_base() noexcept {
     if (ok_) {
-      if constexpr (!detail::is_trivially_destructible_v<T>) {
+      GPCL_CXX17_IF_CONSTEXPR (!detail::is_trivially_destructible_v<T>) {
         val_.T::~T();
       }
     } else {
-      if constexpr (!detail::is_trivially_destructible_v<E>) {
+      GPCL_CXX17_IF_CONSTEXPR (!detail::is_trivially_destructible_v<E>) {
         err_.unexpected<E>::~unexpected();
       }
     }
@@ -134,7 +134,7 @@ public:
 
   GPCL_DECL_INLINE ~expected_destruct_base() noexcept {
     if (!ok_) {
-      if constexpr (!detail::is_trivially_destructible_v<E>) {
+      GPCL_CXX17_IF_CONSTEXPR (!detail::is_trivially_destructible_v<E>) {
         err_.unexpected<E>::~unexpected();
       }
     }
@@ -262,11 +262,11 @@ public:
     if (*this) {
       this->val_ = T(detail::forward<Args>(args)...);
     } else {
-      if constexpr (detail::is_nothrow_constructible_v<T, Args...>) {
+      GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_constructible_v<T, Args...>) {
         this->err_.unexpected<E>::~unexpected();
         new (&this->val_) T(detail::forward<Args>(args)...);
         this->ok_ = true;
-      } else if constexpr (detail::is_nothrow_move_constructible_v<T>) {
+      } else GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_move_constructible_v<T>) {
         T tmp = T(detail::forward<Args>(args)...);
         this->err_.unexpected<E>::~unexpected();
         new (&this->val_) T(detail::move(tmp));
@@ -294,11 +294,11 @@ public:
     if (*this) {
       this->val_ = T(il, detail::forward<Args>(args)...);
     } else {
-      if constexpr (detail::is_nothrow_constructible_v<T, Args...>) {
+      GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_constructible_v<T, Args...>) {
         this->err_.unexpected<E>::~unexpected();
         new (&this->val_) T(il, detail::forward<Args>(args)...);
         this->ok_ = true;
-      } else if constexpr (detail::is_nothrow_move_constructible_v<T>) {
+      } else GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_move_constructible_v<T>) {
         T tmp = T(il, detail::forward<Args>(args)...);
         this->err_.unexpected<E>::~unexpected();
         new (&this->val_) T(detail::move(tmp));
@@ -546,11 +546,11 @@ public:
     if (this->ok_ && other.ok_) {
       this->val_ = other.val_;
     } else if (this->ok_ && !other.ok_) {
-      if constexpr (detail::is_nothrow_copy_constructible_v<E>) {
+      GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_copy_constructible_v<E>) {
         this->val_.T::~T();
         new (&this->err_) unexpected<E>(other.err_);
         this->ok_ = false;
-      } else if constexpr (detail::is_nothrow_move_constructible_v<E>) {
+      } else GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_move_constructible_v<E>) {
         unexpected<E> tmp = other.err_;
         this->val_.T::~T();
         new (&this->err_) unexpected<E>(detail::move(tmp));
@@ -568,11 +568,11 @@ public:
         this->ok_ = false;
       }
     } else if (!this->ok_ && other.ok_) {
-      if constexpr (detail::is_nothrow_copy_constructible_v<T>) {
+      GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_copy_constructible_v<T>) {
         this->err_.unexpected<E>::~unexpected();
         new (&this->val_) T(other.val_);
         this->ok_ = true;
-      } else if constexpr (detail::is_nothrow_move_constructible_v<T>) {
+      } else GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_move_constructible_v<T>) {
         T tmp = other.val_; // can throw!
         this->err_.unexpected<E>::~unexpected();
         new (&this->val_) T(detail::move(tmp));
@@ -672,7 +672,7 @@ public:
     if (this->ok_ && other.ok_) {
       this->val_ = detail::move(other.val_);
     } else if (this->ok_ && !other.ok_) {
-      if constexpr (detail::is_nothrow_move_constructible_v<E>) {
+      GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_move_constructible_v<E>) {
         this->val_.T::~T();
         new (&this->err_) unexpected<E>(detail::move(other.err_));
         this->ok_ = false;
@@ -689,7 +689,7 @@ public:
         this->ok_ = false;
       }
     } else if (!this->ok_ && other.ok_) {
-      if constexpr (detail::is_nothrow_move_constructible_v<T>) {
+      GPCL_CXX17_IF_CONSTEXPR (detail::is_nothrow_move_constructible_v<T>) {
         this->err_.unexpected<E>::~unexpected();
         new (&this->val_) T(detail::move(other.val_));
         this->ok_ = true;
@@ -745,7 +745,7 @@ struct expected_convert_constructible<T, E, U, G,
     : std::false_type {};
 
 template <typename T, typename E, typename U, typename G>
-inline constexpr bool expected_convert_constructible_v =
+GPCL_CXX17_INLINE_CONSTEXPR bool expected_convert_constructible_v =
     expected_convert_constructible<T, E, U, G>();
 
 } // namespace detail
