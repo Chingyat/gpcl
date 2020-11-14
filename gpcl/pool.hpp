@@ -16,7 +16,7 @@ struct is_user_allocator : std::false_type
 
 template <typename T>
 struct is_user_allocator<
-    T, std::void_t<decltype(T::malloc(0)), decltype(T::free((void *)0)),
+    T, std::void_t<decltype(T::malloc(0)), decltype(T::free((char *)0)),
                    typename T::size_type, typename T::difference_type>>
     : std::true_type
 {
@@ -40,7 +40,7 @@ public:
         chunk_size_(std::lcm(requested_size_,
                              std::lcm(sizeof(void *), sizeof(size_type)))),
         block_list_(),
-        next_size_(chunk_size_)
+        next_size_(32)
   {
     assert(requested_size != 0);
   }
@@ -71,23 +71,39 @@ public:
     if (storage_.empty())
     {
       if (request_new_block(chunk_size_))
-        return storage_.malloc();
+        return storage_.malloc(chunk_size_);
       else
         return nullptr;
     }
 
-    return storage_.malloc();
+    return storage_.malloc(chunk_size_);
+  }
+
+  /// Allocates memory for an object of size requested_size.
+  [[nodiscard]] void *ordered_malloc()
+  {
+    gpcl::unique_lock<mutex_type> lock(mutex_);
+
+    if (storage_.empty())
+    {
+      if (request_new_block(chunk_size_, true))
+        return storage_.malloc(chunk_size_);
+      else
+        return nullptr;
+    }
+
+    return storage_.malloc(chunk_size_);
   }
 
   /// Allocates memory for an array of n objects of size requested_size.
-  [[nodiscard]] void *malloc_n(size_type n)
+  [[nodiscard]] void *ordered_malloc(size_type n)
   {
     assert(n != 0);
     auto count = chunk_count(n);
     gpcl::unique_lock<mutex_type> lock(mutex_);
     if (auto ret = storage_.malloc_n(count, chunk_size_))
       return ret;
-    request_new_block(count * chunk_size_);
+    request_new_block(count * chunk_size_, true);
 
     return storage_.malloc_n(count, chunk_size_);
   }
@@ -99,13 +115,6 @@ public:
     storage_.free(ptr);
   }
 
-  /// Frees memory for an array of n objects.
-  void free_n(void *ptr, size_type n)
-  {
-    gpcl::unique_lock<mutex_type> lock(mutex_);
-    storage_.free_n(ptr, chunk_count(n), chunk_size_);
-  }
-
   /// Frees memory for an object.
   void ordered_free(void *ptr)
   {
@@ -114,7 +123,7 @@ public:
   }
 
   /// Frees memory for an array of objects.
-  void ordered_free_n(void *ptr, size_type n)
+  void ordered_free(void *ptr, size_type n)
   {
     gpcl::unique_lock<mutex_type> lock(mutex_);
     storage_.ordered_free_n(ptr, chunk_count(n), chunk_size_);
@@ -145,7 +154,7 @@ private:
   ;
 
   // Requests a block with at least min_size bytes for chunks.
-  bool request_new_block(size_type min_size)
+  bool request_new_block(size_type min_size, bool ordered = false)
   {
     auto sz = next_size_ * chunk_size_;
     while (sz < min_size + sizeof(block_info) * 2)
@@ -157,15 +166,18 @@ private:
     if (block == nullptr)
       return false;
 
-    block_list_ = add_block(block, sz, block_list_);
+    block_list_ = add_block(block, sz, block_list_, ordered);
     GPCL_VERIFY_FALSE(storage_.empty());
     return true;
   }
 
-  block_info add_block(char *ptr, size_type sz, block_info end)
+  block_info add_block(char *ptr, size_type sz, block_info end, bool ordered)
   {
     auto chunks_size = block_info_offset(sz);
-    storage_.add_block(ptr, chunks_size, chunk_size_);
+    if (ordered)
+      storage_.add_ordered_block(ptr, chunks_size, chunk_size_);
+    else
+      storage_.add_block(ptr, chunks_size, chunk_size_);
     *reinterpret_cast<block_info *>(ptr + chunks_size) = end;
     return {ptr, sz};
   }
@@ -178,8 +190,10 @@ private:
 
   size_type chunk_count(size_type n)
   {
-    size_type array_size = n * requested_size_;
-    return (array_size + chunk_size_ - 1) / chunk_size_;
+    const size_type array_size = n * requested_size_;
+    const size_type ret = (array_size + chunk_size_ - 1) / chunk_size_;
+    GPCL_VERIFY(ret * chunk_size_ >= n * requested_size_);
+    return ret;
   }
 
   mutable mutex_type mutex_;
