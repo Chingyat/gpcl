@@ -25,11 +25,6 @@ class simple_segregated_storage : noncopyable
 public:
   using size_type = SizeType;
 
-  /// Constructor.
-  simple_segregated_storage() : free_list_() {}
-
-  /// Destructor.
-  ~simple_segregated_storage() = default;
 
   /// Segregates a memory block of size sz into as many partition_sz-sized
   /// chunks as possible.
@@ -39,116 +34,127 @@ public:
   /// @param partition_sz chunk size
   /// @param end the last chunk's next ptr
   /// @return pointer to the first chunk.
-  static void *segregate(void *block, size_type sz, size_type partition_sz,
-                         void *end = nullptr)
+  void *segregate(void *const block, size_type sz, size_type partition_sz,
+                  void *end = nullptr)
   {
-    assert(partition_sz >= sizeof(void *));
-    assert(partition_sz % sizeof(void *) == 0);
-    assert(sz >= partition_sz);
+    GPCL_ASSERT(block);
+    GPCL_ASSERT(sz >= partition_sz);
 
-    size_type n = sz / partition_sz;
-    for (size_type i = 0; i != n - 1; ++i)
+    void *chunk = block;
+    void *block_end = reinterpret_cast<char *>(block) + sz - partition_sz;
+    while (reinterpret_cast<void *>(reinterpret_cast<char *>(chunk) +
+                                    partition_sz) < block_end)
     {
-      *reinterpret_cast<void **>(reinterpret_cast<char *>(block) +
-                                 partition_sz * i) =
-          reinterpret_cast<char *>(block) + partition_sz * (i + 1);
+      next_chunk(chunk) = reinterpret_cast<char *>(chunk) + partition_sz;
+      chunk = next_chunk(chunk);
     }
-    *reinterpret_cast<void **>(reinterpret_cast<char *>(block) +
-                               partition_sz * (n - 1)) = end;
-
+    next_chunk(chunk) = end;
     return block;
   }
 
   /// Segregates a memory block of size sz, and adds it to the free list.
-  void add_block(void *block, size_type sz, size_type partition_sz)
+  void add_block(void *const block, size_type sz, size_type partition_sz)
   {
     free_list_ = segregate(block, sz, partition_sz, free_list_);
+    GPCL_VERIFY(free_list_);
   }
 
   void add_ordered_block(void *const block, size_type sz,
                          size_type partition_sz)
   {
-    void **lower = lower_bound(block);
-
-    *lower = segregate(block, sz, partition_sz, (*lower));
+    void *&pos = upper_bound(block);
+    pos = segregate(block, sz, partition_sz, pos);
+    GPCL_VERIFY(free_list_);
   }
 
-  [[nodiscard]] bool empty() const { return free_list_ == nullptr; }
+  bool empty() const { return free_list_ == nullptr; }
 
-  void *malloc()
+  void *malloc(size_type partition_sz)
   {
-    assert(!empty());
-    void *ret = free_list_;
-    free_list_ = *reinterpret_cast<void **>(free_list_);
+    GPCL_ASSERT(!empty());
+    auto ret = free_list_;
+    free_list_ = next_chunk(free_list_);
     return ret;
-  }
-
-  void free(void *const chunk)
-  {
-    assert(chunk != nullptr);
-    *reinterpret_cast<void **>(chunk) = free_list_;
-    free_list_ = chunk;
-  }
-
-  void ordered_free(void *const chunk)
-  {
-    void **lower = lower_bound(chunk);
-    *reinterpret_cast<void **>(chunk) = (*lower);
-    *(lower) = chunk;
   }
 
   void *malloc_n(size_type n, size_type partition_sz)
   {
-    size_type m = 0;
     void **p = &free_list_;
-    void **s = p;
+    void **start = p;
+    size_type m = 0;
     while (*p)
     {
-      ++m;
-
-      if (m == n)
-      {
-        auto ret = *s;
-        *s = *reinterpret_cast<void **>(*p);
-        return ret;
-      }
-
-      if (*reinterpret_cast<char **>(*p) - reinterpret_cast<char *>(*p) !=
-          partition_sz)
+      std::ptrdiff_t diff = reinterpret_cast<char *>(next_chunk(*p)) -
+                            reinterpret_cast<char *>(*p);
+      if (diff != partition_sz)
       {
         m = 0;
-        s = p;
+        p = &next_chunk(*p);
+        start = p;
       }
+      else
+      {
+        ++m;
+        p = &next_chunk(*p);
 
-      p = &*reinterpret_cast<void **>(*p);
+        if (m == n)
+        {
+          auto ret = *start;
+          *start = *p;
+          return ret;
+        }
+      }
     }
+
     return nullptr;
   }
 
-  void free_n(void *chunks, size_type n, size_type partition_sz)
+  void free(void *const chunk)
   {
-    add_block(chunks, n * partition_sz, partition_sz);
+    next_chunk(chunk) = free_list_;
+    free_list_ = chunk;
   }
 
-  void ordered_free_n(void *chunks, size_type n, size_type partition_sz)
+  void free_n(void *const chunk, size_type partition_sz, size_type n)
   {
-    add_ordered_block(chunks, n * partition_sz, partition_sz);
+    add_block(chunk, partition_sz * n, partition_sz);
+  }
+
+  void ordered_free(void *const chunk)
+  {
+    void *&pos = upper_bound(chunk);
+    next_chunk(chunk) = pos;
+    pos = chunk;
+  }
+
+  void ordered_free_n(void *const chunk, size_type n, size_type partition_sz)
+  {
+    add_ordered_block(chunk, partition_sz * n, partition_sz);
   }
 
 private:
-  // Returns the pointer to the last chunk that greater-equals p
-  void **lower_bound(void *p)
+  void *&upper_bound(void *const p)
   {
-    void **p1 = &free_list_;
-    while (*p1 && *reinterpret_cast<void **>(*p1) < p)
+    void **pp = &free_list_;
+    while (*pp)
     {
-      p1 = &*reinterpret_cast<void **>(*p1);
+      void *&next = next_chunk(*pp);
+      if (next > p)
+      {
+        return next;
+      }
+      pp = &next;
     }
-
-    return p1;
+    return *pp;
   }
 
-  void *free_list_;
+  static void *&next_chunk(void *chunk)
+  {
+    GPCL_ASSERT(chunk);
+    return *reinterpret_cast<void **>(chunk);
+  }
+
+  void *free_list_{};
 };
 
 } // namespace gpcl
