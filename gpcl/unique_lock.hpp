@@ -20,15 +20,21 @@
 
 namespace gpcl {
 
-struct adopt_lock_t {};
+struct adopt_lock_t
+{
+};
 
-struct try_to_lock_t {};
+struct try_to_lock_t
+{
+};
 
-struct defer_lock_t {};
+struct defer_lock_t
+{
+};
 
-constexpr adopt_lock_t adopt_lock{};
-constexpr try_to_lock_t try_to_lock{};
-constexpr defer_lock_t defer_lock{};
+GPCL_CXX17_INLINE_CONSTEXPR adopt_lock_t adopt_lock{};
+GPCL_CXX17_INLINE_CONSTEXPR try_to_lock_t try_to_lock{};
+GPCL_CXX17_INLINE_CONSTEXPR defer_lock_t defer_lock{};
 
 /// RAII type that automatically unlocks the mutex.
 template <typename MutexType>
@@ -152,4 +158,4 @@ private:
 
 } // namespace gpcl
 
-#endif //! GPCL_UNIQUE_LOCK_HPP
+#endif // GPCL_UNIQUE_LOCK_HPP
