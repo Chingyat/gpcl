@@ -37,12 +37,11 @@ const_buffer buffer(const T &obj,
 }
 
 template <typename T>
-mutable_buffer buffer(T &obj,
-                    std::enable_if_t<std::is_standard_layout_v<T>> * = nullptr)
+mutable_buffer
+buffer(T &obj, std::enable_if_t<std::is_standard_layout_v<T>> * = nullptr)
 {
-  return const_buffer(reinterpret_cast<char *>(obj), sizeof obj);
+  return mutable_buffer(reinterpret_cast<char *>(obj), sizeof obj);
 }
-
 
 } // namespace gpcl
 
