@@ -17,14 +17,11 @@
 #include <gpcl/condition_variable.hpp>
 #include <gpcl/creation_tag.hpp>
 #include <gpcl/default_malloc_free_user_allocator.hpp>
-#include <gpcl/detail>
 #include <gpcl/error.hpp>
 #include <gpcl/event.hpp>
 #include <gpcl/expected.hpp>
 #include <gpcl/expected_fwd.hpp>
-#include <gpcl/ext>
 #include <gpcl/ext.hpp>
-#include <gpcl/impl>
 #include <gpcl/in_place_t.hpp>
 #include <gpcl/is_basic_lockable.hpp>
 #include <gpcl/is_lockable.hpp>
@@ -51,3 +48,4 @@
 
 
 #endif // GPCL_HPP
+

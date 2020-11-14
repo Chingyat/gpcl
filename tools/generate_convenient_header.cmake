@@ -1,6 +1,6 @@
 set(INCLUDES "")
 
-file(GLOB files "gpcl/*")
+file(GLOB files "gpcl/*.hpp")
 foreach(file ${files})
     get_filename_component(filename ${file} NAME)
     string(APPEND INCLUDES "#include <gpcl/${filename}>\n")
