@@ -21,7 +21,40 @@
 
 namespace gpcl {
 
-class GPCL_CAPABILITY("mutex") mutex : noncopyable {
+class GPCL_CAPABILITY("mutex") null_mutex : noncopyable
+{
+public:
+  constexpr null_mutex() = default;
+  ~null_mutex() = default;
+
+  GPCL_ACQUIRE() auto lock() -> void
+  {
+    GPCL_ASSERT(!std::exchange(locked_, true));
+  }
+
+  GPCL_RELEASE() auto unlock() -> void
+  {
+    GPCL_ASSERT(std::exchange(locked_, false));
+  }
+
+  GPCL_TRY_ACQUIRE(true) auto try_lock() -> bool
+  {
+#ifndef NDEBUG
+    return !std::exchange(locked_, true);
+#else
+    return true;
+#endif
+  }
+  auto native_handle() noexcept -> std::nullptr_t { return nullptr; }
+
+private:
+#ifndef NDEBUG
+  bool locked_;
+#endif
+};
+
+class GPCL_CAPABILITY("mutex") mutex : noncopyable
+{
 public:
 #if defined(GPCL_DOXYGEN)
   using impl_type = /*unspecified*/;
@@ -45,7 +78,8 @@ public:
   GPCL_RELEASE() auto unlock() -> void { return impl_.unlock(); }
   GPCL_TRY_ACQUIRE(true) auto try_lock() -> bool { return impl_.try_lock(); }
 
-  auto native_handle() noexcept -> native_handle_type {
+  auto native_handle() noexcept -> native_handle_type
+  {
     return impl_.native_handle();
   }
 
@@ -53,7 +87,8 @@ private:
   impl_type impl_;
 };
 
-class GPCL_CAPABILITY("mutex") timed_mutex : noncopyable {
+class GPCL_CAPABILITY("mutex") timed_mutex : noncopyable
+{
 public:
 #if defined(GPCL_DOXYGEN)
   using impl_type = /*unspecified*/;
@@ -78,32 +113,36 @@ public:
   GPCL_TRY_ACQUIRE(true) auto try_lock() -> bool { return impl_.try_lock(); }
 
   template <typename Clock, typename Duration,
-      typename std::enable_if<std::is_same<Clock, system_clock>::value,
-          int>::type = 0>
+            typename std::enable_if<std::is_same<Clock, system_clock>::value,
+                                    int>::type = 0>
   GPCL_TRY_ACQUIRE(true)
   auto try_lock_until(chrono::time_point<Clock, Duration> const &timeout_time)
-      -> bool {
+      -> bool
+  {
     return impl_.try_lock_until(
         chrono::time_point_cast<system_clock::duration>(timeout_time));
   }
 
   template <typename Clock, typename Duration,
-      typename std::enable_if<!std::is_same<Clock, system_clock>::value,
-          int>::type = 0>
+            typename std::enable_if<!std::is_same<Clock, system_clock>::value,
+                                    int>::type = 0>
   GPCL_TRY_ACQUIRE(true)
   auto try_lock_until(chrono::time_point<Clock, Duration> const &timeout_time)
-      -> bool {
+      -> bool
+  {
     return try_lock_for(timeout_time - Clock::now());
   }
 
   template <typename Rep, typename Period>
   GPCL_TRY_ACQUIRE(true)
-  auto try_lock_for(chrono::duration<Rep, Period> const &rel_time) -> bool {
+  auto try_lock_for(chrono::duration<Rep, Period> const &rel_time) -> bool
+  {
     return impl_.try_lock_for(
         chrono::duration_cast<system_clock::duration>(rel_time));
   }
 
-  auto native_handle() noexcept -> native_handle_type {
+  auto native_handle() noexcept -> native_handle_type
+  {
     return impl_.native_handle();
   }
 
@@ -111,7 +150,8 @@ private:
   impl_type impl_;
 };
 
-class recursive_mutex : noncopyable {
+class recursive_mutex : noncopyable
+{
 public:
 #if defined(GPCL_DOXYGEN)
   using impl_type = /*unspecified*/;
@@ -135,7 +175,8 @@ public:
   GPCL_RELEASE() auto unlock() -> void { return impl_.unlock(); }
   GPCL_TRY_ACQUIRE(true) auto try_lock() -> bool { return impl_.try_lock(); }
 
-  auto native_handle() noexcept -> native_handle_type {
+  auto native_handle() noexcept -> native_handle_type
+  {
     return impl_.native_handle();
   }
 
