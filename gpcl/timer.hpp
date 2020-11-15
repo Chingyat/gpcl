@@ -19,6 +19,8 @@
 namespace gpcl {
 
 #ifdef GPCL_POSIX
+
+/// Basic waitable timer.
 template <typename Clock> class basic_timer {
 public:
   using clock = Clock;

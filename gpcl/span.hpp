@@ -79,6 +79,7 @@ using span_base =
 
 GPCL_CXX17_INLINE_CONSTEXPR std::size_t dynamic_extent = -1;
 
+/// A contiguous container view.
 template <typename T, std::size_t E = dynamic_extent>
 class span;
 
@@ -279,7 +280,7 @@ public:
   template <typename U = T, std::size_t N>
   GPCL_DECL_INLINE constexpr bool operator<(span<U, N> other) const
   {
-    static_assert(std::is_same<std::decay_t<U>, value_type>{},"");
+    static_assert(std::is_same<std::decay_t<U>, value_type>{}, "");
     return std::lexicographical_compare(begin(), end(), other.begin(),
                                         other.end());
   }
@@ -321,7 +322,7 @@ public:
 #endif
 };
 
-#if __cplusplus >= 201703
+#if __cplusplus >= 201703 && !defined(GPCL_STANDARDESE)
 
 template <typename T, std::size_t N>
 span(T (&)[N]) -> span<T, N>;

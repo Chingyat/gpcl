@@ -165,7 +165,7 @@ using negate = std::integral_constant<bool, !T::value>;
 template <typename T>
 GPCL_CXX17_INLINE_CONSTEXPR bool negate_v = negate<T>::value;
 
-template <bool C, typename T>
+template <bool C, typename T = void>
 using enable_if_t = typename std::enable_if<C, T>::type;
 
 template <typename...>
@@ -195,6 +195,16 @@ template <typename T, typename U>
 struct is_nothrow_swappable<T, U, true>
     : std::integral_constant<bool, noexcept(swap(std::declval<T &>(),
                                                  std::declval<U &>()))>
+{
+};
+
+template <class T>
+struct is_unbounded_array : std::false_type
+{
+};
+
+template <class T>
+struct is_unbounded_array<T[]> : std::true_type
 {
 };
 

@@ -91,7 +91,7 @@ public:
   /// If there is a waiter, then unlock and wakeup it.
   /// Otherwise do nothing.
   ///
-  /// \return Whether a waiter has been waken up.
+  /// \returns Whether a waiter has been waken up.
   template <typename Lock>
   bool try_unlock_and_signal_one(Lock &lock)
   {

@@ -1,12 +1,24 @@
+//
+// memory_resource.hpp
+// ~~~~~~~~~~~~~~~~~~~
+//
+// Copyright (c) 2020 Zhengyi Fu (tsingyat at outlook dot com)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #ifndef GPCL_MEMORY_RESOURCE_HPP
 #define GPCL_MEMORY_RESOURCE_HPP
 
+#include <gpcl/buffer.hpp>
 #include <gpcl/detail/config.hpp>
 #include <cstddef> // for max_align_t
+#include <cstring>
 
 namespace gpcl {
-
 inline namespace pmr {
+
 class memory_resource
 {
 public:
@@ -78,10 +90,7 @@ public:
   {
   }
 
-  ~monotonic_buffer_resource()
-  {
-    release();
-  }
+  ~monotonic_buffer_resource() { release(); }
 
   void release()
   {
@@ -100,10 +109,7 @@ public:
     GPCL_VERIFY(block_list_.size == 0);
   }
 
-  memory_resource* upstream_resource() const
-  {
-    return upstream_;
-  }
+  memory_resource *upstream_resource() const { return upstream_; }
 
 private:
   struct block_info
@@ -121,11 +127,11 @@ private:
 
     if (off > buffer_.size_bytes())
       return nullptr;
-    buffer_ = buffer_.subspan(off);
+    buffer_ += off;
     if (buffer_.size_bytes() < bytes)
       return nullptr;
     auto *ret = buffer_.data();
-    buffer_ = buffer_.subspan(bytes);
+    buffer_ += bytes;
     return ret;
   }
 
@@ -137,7 +143,7 @@ private:
     block_list_.ptr = p;
     block_list_.size = next_buffer_bytes_;
     block_list_.alignment = sizeof(std::max_align_t);
-    buffer_ = span<char>(reinterpret_cast<char *>(p), next_buffer_bytes_);
+    buffer_ = buffer(p, next_buffer_bytes_);
     next_buffer_bytes_ *= 2;
   }
 
@@ -167,7 +173,7 @@ private:
     return &other == this;
   }
 
-  span<char> buffer_;
+  mutable_buffer buffer_;
   memory_resource *upstream_;
   std::size_t next_buffer_bytes_ = 32;
   block_info block_list_{};

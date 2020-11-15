@@ -16,7 +16,6 @@
 #include <gpcl/clock.hpp>
 #include <gpcl/condition_variable.hpp>
 #include <gpcl/creation_tag.hpp>
-#include <gpcl/default_malloc_free_user_allocator.hpp>
 #include <gpcl/error.hpp>
 #include <gpcl/event.hpp>
 #include <gpcl/expected.hpp>

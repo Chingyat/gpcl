@@ -142,9 +142,10 @@ public:
   {
   }
 
-  template <
-      typename U, typename... Args,
-      detail::enable_if_t<detail::is_constructible_v<T, Args &&...>, int> = 0>
+  template <typename U, typename... Args,
+            detail::enable_if_t<detail::is_constructible_v<
+                                    T, std::initializer_list<U> &, Args &&...>,
+                                int> = 0>
   GPCL_DECL_INLINE constexpr expected(in_place_t,
                                       std::initializer_list<U> ilist,
                                       Args &&... args)
@@ -158,7 +159,8 @@ public:
                     std::is_convertible<const U &, T>,
                     std::is_convertible<const G &, E>,
                     detail::expected_convert_constructible<T, E, U, G>>,
-                int> = 0>
+                int>
+                Dummy1 = 0>
   GPCL_DECL_INLINE constexpr expected(const expected<U, G> &rhs);
 
   template <typename U, typename G,
@@ -168,14 +170,16 @@ public:
                         detail::negate<std::is_convertible<const U &, T>>,
                         detail::negate<std::is_convertible<const G &, E>>>,
                     detail::expected_convert_constructible<T, E, U, G>>,
-                int> = 0>
+                int>
+                Dummy2 = 0>
   GPCL_DECL_INLINE explicit constexpr expected(const expected<U, G> &rhs);
 
   template <typename U, typename G,
             detail::enable_if_t<
                 detail::conjunction_v<std::is_convertible<const G &, E>,
                                       std::is_void<T>, std::is_void<U>>,
-                int> = 0>
+                int>
+                Dummy3 = 0>
   GPCL_DECL_INLINE constexpr expected(const expected<U, G> &rhs);
 
   template <
@@ -183,7 +187,8 @@ public:
       detail::enable_if_t<detail::conjunction_v<
                               detail::negate<std::is_convertible<const G &, E>>,
                               std::is_void<T>, std::is_void<U>>,
-                          int> = 0>
+                          int>
+          Dummy4 = 0>
   GPCL_DECL_INLINE explicit constexpr expected(const expected<U, G> &rhs);
 
   template <typename U, typename G,
@@ -191,7 +196,8 @@ public:
                 detail::conjunction_v<
                     std::is_convertible<U &&, T>, std::is_convertible<G &&, E>,
                     detail::expected_convert_constructible<T, E, U, G>>,
-                int> = 0>
+                int>
+                Dummy1 = 0>
   GPCL_DECL_INLINE constexpr expected(expected<U, G> &&rhs);
 
   template <
@@ -201,14 +207,16 @@ public:
               detail::disjunction<detail::negate<std::is_convertible<U &&, T>>,
                                   detail::negate<std::is_convertible<G &&, E>>>,
               detail::expected_convert_constructible<T, E, U, G>>,
-          int> = 0>
+          int>
+          Dummy2 = 0>
   GPCL_DECL_INLINE explicit constexpr expected(expected<U, G> &&rhs);
 
   template <typename U, typename G,
             detail::enable_if_t<
                 detail::conjunction_v<std::is_convertible<G &&, E>,
                                       std::is_void<T>, std::is_void<U>>,
-                int> = 0>
+                int>
+                Dummy3 = 0>
   GPCL_DECL_INLINE constexpr expected(expected<U, G> &&rhs);
 
   template <
@@ -216,7 +224,8 @@ public:
       detail::enable_if_t<
           detail::conjunction_v<detail::negate<std::is_convertible<G &&, E>>,
                                 std::is_void<T>, std::is_void<U>>,
-          int> = 0>
+          int>
+          Dummy4 = 0>
   GPCL_DECL_INLINE explicit constexpr expected(expected<U, G> &&rhs);
 
   template <
@@ -228,7 +237,8 @@ public:
               detail::negate<std::is_same<std::decay_t<U>, in_place_t>>,
               detail::negate<std::is_same<std::decay_t<U>, expected>>,
               detail::negate<std::is_same<std::decay_t<U>, unexpected<E>>>>,
-          int> = 0>
+          int>
+          Dummy1 = 0>
   GPCL_DECL_INLINE constexpr expected(U &&v)
       : base_type(in_place, detail::forward<U>(v))
   {
@@ -244,7 +254,8 @@ public:
               detail::negate<std::is_same<std::decay_t<U>, in_place_t>>,
               detail::negate<std::is_same<std::decay_t<U>, expected>>,
               detail::negate<std::is_same<std::decay_t<U>, unexpected<E>>>>,
-          int> = 0>
+          int>
+          Dummy2 = 0>
   GPCL_DECL_INLINE explicit constexpr expected(U &&v)
       : base_type(in_place, detail::forward<U>(v))
   {
@@ -254,7 +265,8 @@ public:
             detail::enable_if_t<
                 detail::conjunction_v<std::is_convertible<const G &, E>,
                                       std::is_constructible<E, const G &>>,
-                int> = 0>
+                int>
+                Dummy1 = 0>
   GPCL_DECL_INLINE constexpr expected(const unexpected<G> &e)
       : base_type(unexpect, e)
   {
@@ -265,7 +277,8 @@ public:
       detail::enable_if_t<detail::conjunction_v<
                               detail::negate<std::is_convertible<const G &, E>>,
                               std::is_constructible<E, const G &>>,
-                          int> = 0>
+                          int>
+          Dummy2 = 0>
   GPCL_DECL_INLINE explicit constexpr expected(const unexpected<G> &e)
       : base_type(unexpect, e)
   {
@@ -275,7 +288,8 @@ public:
       typename G = E,
       detail::enable_if_t<detail::conjunction_v<std::is_convertible<G &&, E>,
                                                 std::is_constructible<E, G &&>>,
-                          int> = 0>
+                          int>
+          Dummy1 = 0>
   GPCL_DECL_INLINE constexpr expected(unexpected<G> &&e)
       : base_type(unexpect, e)
   {
@@ -286,7 +300,8 @@ public:
       detail::enable_if_t<
           detail::conjunction_v<detail::negate<std::is_convertible<G &&, E>>,
                                 std::is_constructible<E, G &&>>,
-          int> = 0>
+          int>
+          Dummy2 = 0>
   GPCL_DECL_INLINE explicit constexpr expected(unexpected<G> &&e)
       : base_type(unexpect, e)
   {
@@ -314,7 +329,19 @@ public:
   expected &operator=(const expected &rhs) = default;
   expected &operator=(expected &&rhs) = default;
 
-  template <typename U = T, detail::enable_if_t<!detail::is_void_v<U>, int> = 0>
+  template <
+      typename U = T,
+      detail::enable_if_t<
+          detail::conjunction_v<
+              detail::negate<std::is_void<U>>,
+              detail::negate<std::is_same<expected<T, E>, std::decay_t<U>>>,
+              detail::negate<std::conjunction<
+                  std::is_scalar<T>, std::is_same<T, std::decay_t<U>>>>,
+              std::is_constructible<T, U &&>,
+              std::is_assignable<std::add_lvalue_reference_t<T>, U &&>,
+              detail::disjunction<std::is_nothrow_constructible<T, U &&>,
+                                  detail::is_nothrow_move_constructible<E>>>,
+          int> = 0>
   GPCL_DECL_INLINE expected<T, E> &operator=(U &&v);
 
   template <typename G = E,
@@ -322,7 +349,7 @@ public:
                 detail::conjunction_v<detail::is_nothrow_copy_constructible<G>,
                                       detail::is_copy_assignable<G>,
                                       detail::negate<std::is_void<T>>>,
-                int>::type = 0>
+                int>::type Dummy1 = 0>
   GPCL_DECL_INLINE expected<T, E> &operator=(const unexpected<G> &e)
   {
     if (*this)
@@ -343,7 +370,7 @@ public:
       typename std::enable_if<
           detail::conjunction_v<detail::is_nothrow_copy_constructible<G>,
                                 detail::is_copy_assignable<G>, std::is_void<T>>,
-          int>::type = 0>
+          int>::type Dummy2 = 0>
   GPCL_DECL_INLINE expected<T, E> &operator=(const unexpected<G> &e)
   {
     if (*this)
@@ -363,7 +390,8 @@ public:
                 detail::conjunction_v<detail::is_nothrow_move_constructible<G>,
                                       detail::is_move_assignable<G>,
                                       detail::negate<std::is_void<T>>>,
-                int> = 0>
+                int>
+                Dummy1 = 0>
   GPCL_DECL_INLINE expected<T, E> &operator=(unexpected<G> &&e);
 
   template <
@@ -371,8 +399,17 @@ public:
       detail::enable_if_t<
           detail::conjunction_v<detail::is_nothrow_move_constructible<G>,
                                 detail::is_move_assignable<G>, std::is_void<T>>,
-          int> = 0>
+          int>
+          Dummy2 = 0>
   GPCL_DECL_INLINE expected<T, E> &operator=(unexpected<G> &&e);
+
+  void swap(expected<T, E> &other) noexcept(
+      std::is_nothrow_copy_assignable<expected<T, E>>::value)
+  {
+    auto tmp = detail::move(other);
+    other = detail::move(*this);
+    *this = detail::move(tmp);
+  }
 
   /// Returns x if bool(*this) is true, otherwise returns
   /// unexpected(error())
@@ -439,7 +476,7 @@ public:
   template <typename F,
             typename U =
                 std::invoke_result_t<F, std::add_lvalue_reference_t<const T>>,
-            detail::enable_if_t<!detail::is_void_v<U>, int> = 0>
+            detail::enable_if_t<!detail::is_void_v<U>, int> Dummy1 = 0>
   GPCL_DECL_INLINE rebind<U> map(F &&f) const &
   {
     if (*this)
@@ -457,7 +494,7 @@ public:
   template <typename F,
             typename U =
                 std::invoke_result_t<F, std::add_lvalue_reference_t<const T>>,
-            detail::enable_if_t<detail::is_void_v<U>, int> = 0>
+            detail::enable_if_t<detail::is_void_v<U>, int> Dummy2 = 0>
   GPCL_DECL_INLINE rebind<U> map(F &&f) const &
   {
     if (*this)
@@ -476,7 +513,7 @@ public:
   template <
       typename F,
       typename U = std::invoke_result_t<F, std::add_rvalue_reference_t<T>>,
-      detail::enable_if_t<!detail::is_void_v<U>, int> = 0>
+      detail::enable_if_t<!detail::is_void_v<U>, int> Dummy1 = 0>
   GPCL_DECL_INLINE rebind<U> map(F &&f) &&
   {
     if (*this)
@@ -495,7 +532,7 @@ public:
   template <
       typename F,
       typename U = std::invoke_result_t<F, std::add_rvalue_reference_t<T>>,
-      detail::enable_if_t<detail::is_void_v<U>, int> = 0>
+      detail::enable_if_t<detail::is_void_v<U>, int> Dummy2 = 0>
   GPCL_DECL_INLINE rebind<U> map(F &&f) &&
   {
     if (*this)
@@ -646,7 +683,8 @@ public:
       detail::enable_if_t<
           detail::conjunction_v<detail::negate<std::is_void<T>>,
                                 std::is_same<typename Result::value_type, T>>,
-          int> = 0>
+          int>
+          Dummy1 = 0>
   GPCL_DECL_INLINE Result or_else(F &&f) const &
   {
     if (*this)
@@ -666,7 +704,8 @@ public:
       detail::enable_if_t<
           detail::conjunction_v<std::is_same<typename Result::value_type, T>,
                                 detail::negate<std::is_void<T>>>,
-          int> = 0>
+          int>
+          Dummy1 = 0>
   GPCL_DECL_INLINE Result or_else(F &&f) &&
   {
     if (*this)
@@ -687,7 +726,8 @@ public:
       detail::enable_if_t<
           detail::conjunction_v<std::is_same<typename Result::value_type, T>,
                                 std::is_void<T>>,
-          int> = 0>
+          int>
+          Dummy2 = 0>
   GPCL_DECL_INLINE Result or_else(F &&f) const &
   {
     if (*this)
@@ -707,7 +747,8 @@ public:
       detail::enable_if_t<
           detail::conjunction_v<std::is_same<typename Result::value_type, T>,
                                 std::is_void<T>>,
-          int> = 0>
+          int>
+          Dummy2 = 0>
   GPCL_DECL_INLINE Result or_else(F &&f) &&
   {
     if (*this)
@@ -826,16 +867,102 @@ public:
   }
 };
 
+template <typename T, typename E>
+void swap(expected<T, E> &x, expected<T, E> &y) noexcept(noexcept(x.swap(y)))
+{
+  x.swap(y);
+}
+
+template <typename T, typename E>
+constexpr bool operator==(const expected<T, E> &x, const expected<T, E> &y)
+{
+  if (x && y)
+  {
+    return *x == *y;
+  }
+
+  if (!x && !y)
+  {
+    return x.error() == y.error();
+  }
+
+  return false;
+}
+
+template <typename T, typename E>
+constexpr bool operator!=(const expected<T, E> &x, const expected<T, E> &y)
+{
+  return !(x == y);
+}
+
+template <typename T, typename E>
+constexpr bool operator==(const expected<T, E> &x, const T &y)
+{
+  if (!x)
+    return false;
+  return *x == y;
+}
+
+template <typename T, typename E>
+constexpr bool operator==(const T &x, const expected<T, E> &y)
+{
+  if (!y)
+    return false;
+  return x == *y;
+}
+
+template <typename T, typename E>
+constexpr bool operator!=(const expected<T, E> &x, const T &y)
+{
+  return !(x == y);
+}
+
+template <typename T, typename E>
+constexpr bool operator!=(const T &x, const expected<T, E> &y)
+{
+  return !(x == y);
+}
+
+template <typename T, typename E>
+constexpr bool operator==(const expected<T, E> &x, const unexpected<E> &y)
+{
+  if (x)
+    return false;
+  return x.error() == y.value();
+}
+
+template <typename T, typename E>
+constexpr bool operator==(const unexpected<E> &x, const expected<T, E> &y)
+{
+  if (y)
+    return false;
+  return x.value() == y.error();
+}
+
+template <typename T, typename E>
+constexpr bool operator!=(const expected<T, E> &x, const unexpected<E> &y)
+{
+  return !(x == y);
+}
+
+template <typename T, typename E>
+constexpr bool operator!=(const unexpected<E> &x, const expected<T, E> &y)
+{
+  return !(x == y);
+}
+
 #define GPCL_EXPECTED_TRY(var, exp)                                            \
   auto _gpcl_expected_##var = exp;                                             \
   if (!_gpcl_expected_##var)                                                   \
   {                                                                            \
-    return ::gpcl::make_unexpected(std::move(_gpcl_expected_##var).error());                            \
+    return ::gpcl::make_unexpected(std::move(_gpcl_expected_##var).error());   \
   }                                                                            \
   auto &&var = *_gpcl_expected_##var;
 
 } // namespace gpcl
 
-#include <gpcl/impl/expected.hpp>
+#ifndef GPCL_STANDARDESE
+#  include <gpcl/impl/expected.hpp>
+#endif
 
 #endif // GPCL_EXPECTED_HPP

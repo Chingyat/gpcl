@@ -19,6 +19,7 @@
 
 namespace gpcl {
 
+/// Simple segregated storage algorithm implementation.
 template <typename SizeType = std::size_t>
 class simple_segregated_storage : noncopyable
 {

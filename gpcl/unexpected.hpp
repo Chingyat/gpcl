@@ -15,6 +15,7 @@
 #include <gpcl/detail/config.hpp>
 #include <gpcl/detail/type_traits.hpp>
 #include <gpcl/detail/utility.hpp>
+#include <gpcl/error.hpp>
 #include <gpcl/expected_fwd.hpp>
 #include <gpcl/in_place_t.hpp>
 
@@ -84,7 +85,8 @@ public:
                     !detail::is_convertible_v<unexpected<Err>, E> &&
                     !detail::is_convertible_v<const unexpected<Err> &, E> &&
                     !detail::is_convertible_v<const unexpected<Err>, E>,
-                int> = 0>
+                int>
+                Dummy1 = 0>
   GPCL_DECL_INLINE constexpr unexpected(const unexpected<Err> &e) : val_(e.val_)
   {
   }
@@ -101,7 +103,8 @@ public:
                     !detail::is_convertible_v<unexpected<Err>, E> &&
                     !detail::is_convertible_v<const unexpected<Err> &, E> &&
                     !detail::is_convertible_v<const unexpected<Err>, E>,
-                int> = 0>
+                int>
+                Dummy2 = 0>
   GPCL_DECL_INLINE constexpr explicit unexpected(const unexpected<Err> &e)
       : val_(e.val_)
   {
@@ -119,7 +122,8 @@ public:
                     !detail::is_convertible_v<unexpected<Err>, E> &&
                     !detail::is_convertible_v<const unexpected<Err> &, E> &&
                     !detail::is_convertible_v<const unexpected<Err>, E>,
-                int> = 0>
+                int>
+                Dummy1 = 0>
   GPCL_DECL_INLINE constexpr unexpected(unexpected<Err> &&e)
       : val_(detail::move(e.val_))
   {
@@ -137,7 +141,8 @@ public:
                     !detail::is_convertible_v<unexpected<Err>, E> &&
                     !detail::is_convertible_v<const unexpected<Err> &, E> &&
                     !detail::is_convertible_v<const unexpected<Err>, E>,
-                int> = 0>
+                int>
+                Dummy2 = 0>
   GPCL_DECL_INLINE constexpr explicit unexpected(unexpected<Err> &&e)
       : val_(detail::move(e.val_))
   {

@@ -20,6 +20,7 @@ namespace gpcl {
 
 #if defined(GPCL_POSIX) || defined(GPCL_WINDOWS)
 
+/// Semaphore.
 class semaphore : noncopyable {
 public:
 #if defined(GPCL_POSIX)

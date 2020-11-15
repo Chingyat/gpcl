@@ -15,12 +15,15 @@
 #include <gpcl/noncopyable.hpp>
 
 namespace gpcl {
+
+/// Thread schedule policies.
 enum class schedule_policy {
   other,
   round_robin,
   fifo,
 };
 
+/// Thread attributes.
 class thread_attributes : noncopyable {
 public:
   using schedule_policy_type = gpcl::schedule_policy;
