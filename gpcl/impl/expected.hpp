@@ -64,16 +64,21 @@ constexpr expected<T, E>::expected(const expected<U, G> &rhs)
 }
 
 template <typename T, typename E>
-template <typename U, detail::enable_if_t<!detail::is_void_v<U>, int>>
+template <
+    typename U,
+    detail::enable_if_t<
+        detail::conjunction_v<
+            detail::negate<std::is_void<U>>,
+            detail::negate<std::is_same<expected<T, E>, std::decay_t<U>>>,
+            detail::negate<std::conjunction<std::is_scalar<T>,
+                                            std::is_same<T, std::decay_t<U>>>>,
+            std::is_constructible<T, U &&>,
+            std::is_assignable<std::add_lvalue_reference_t<T>, U &&>,
+            detail::disjunction<std::is_nothrow_constructible<T, U &&>,
+                                detail::is_nothrow_move_constructible<E>>>,
+        int>>
 expected<T, E> &expected<T, E>::operator=(U &&v)
 {
-
-  static_assert(
-      !detail::is_same_v<expected, std::decay_t<U>> &&
-      !(std::is_scalar<T>::value && std::is_same<T, std::decay_t<U>>::value) &&
-      detail::is_constructible_v<T, U> && detail::is_assignable_v<T &, U> &&
-      detail::is_nothrow_move_constructible_v<E>);
-
   if (*this)
   {
     this->val_ = detail::forward<U>(v);

@@ -22,7 +22,7 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 
 if (MINGW)
     add_compile_options(-Wa,-mbig-obj)
-endif()
+endif ()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -124,8 +124,17 @@ set(GPCL_HEADERS
         gpcl/simple_segregated_storage.hpp
         gpcl/pool_allocator.hpp)
 
-add_library(gpcl ${GPCL_HEADERS} lib/src.cpp)
-target_include_directories(gpcl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(gpcl INTERFACE)
+add_library(gpcl::gpcl ALIAS gpcl)
+target_include_directories(gpcl INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 install(DIRECTORY include/gpcl DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES include/gpcl.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (EXISTS vendor/Catch2)
+    add_subdirectory(vendor/Catch2)
+else ()
+    find_package(Catch2 REQUIRED)
+endif ()
+
+add_subdirectory(tests)
