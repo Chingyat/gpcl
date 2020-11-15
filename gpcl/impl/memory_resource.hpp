@@ -77,12 +77,13 @@ std::atomic<memory_resource *> &default_memory_resource()
 
 void set_default_resource(memory_resource *resource) noexcept
 {
-  pmr_detail::default_memory_resource() = resource;
+  pmr_detail::default_memory_resource().store(resource,
+                                              std::memory_order_acq_rel);
 }
 
 memory_resource *get_default_resource() noexcept
 {
-  return pmr_detail::default_memory_resource();
+  return pmr_detail::default_memory_resource().load(std::memory_order_acquire);
 }
 
 } // namespace pmr

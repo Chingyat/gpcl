@@ -15,12 +15,15 @@ public:
   [[nodiscard]] void *
   allocate(std::size_t bytes, std::size_t alignment = alignof(std::max_align_t))
   {
-    return do_allocate(bytes, alignment);
+    void *ret = do_allocate(bytes, alignment);
+    GPCL_VERIFY(reinterpret_cast<std::uintptr_t>(ret) % alignment == 0);
+    return ret;
   }
 
   void deallocate(void *p, std::size_t bytes,
                   std::size_t alignment = alignof(std::max_align_t))
   {
+    GPCL_ASSERT(reinterpret_cast<std::uintptr_t>(p) % alignment == 0);
     return do_deallocate(p, bytes, alignment);
   }
 
@@ -46,7 +49,6 @@ GPCL_DECL memory_resource *get_default_resource() noexcept;
 
 GPCL_DECL void set_default_resource(memory_resource *resource) noexcept;
 
-// fixme: do not allocate memory for storing block info.
 class monotonic_buffer_resource : public memory_resource
 {
 public:
@@ -55,6 +57,8 @@ public:
       : buffer_(reinterpret_cast<char *>(buffer), size),
         upstream_(upstream)
   {
+    GPCL_ASSERT(buffer);
+    GPCL_ASSERT(upstream);
   }
 
   explicit monotonic_buffer_resource(
@@ -63,6 +67,8 @@ public:
       : upstream_(upstream),
         next_buffer_bytes_(initial_buffer)
   {
+    GPCL_ASSERT(initial_buffer != 0);
+    GPCL_ASSERT(upstream);
     request_from_upstream();
   }
 
@@ -74,16 +80,45 @@ public:
 
   ~monotonic_buffer_resource()
   {
-    for (auto block : blocks_)
-      upstream_->deallocate(std::get<0>(block), std::get<1>(block),
-                            std::get<2>(block));
+    release();
+  }
+
+  void release()
+  {
+    while (block_list_.ptr)
+    {
+      block_info next;
+      std::memcpy(&next,
+                  reinterpret_cast<char *>(block_list_.ptr) + block_list_.size,
+                  sizeof(next));
+      upstream_->deallocate(block_list_.ptr, block_list_.size,
+                            block_list_.alignment);
+      block_list_ = next;
+    }
+
+    GPCL_VERIFY(block_list_.ptr == nullptr);
+    GPCL_VERIFY(block_list_.size == 0);
+  }
+
+  memory_resource* upstream_resource() const
+  {
+    return upstream_;
   }
 
 private:
+  struct block_info
+  {
+    void *ptr;
+    std::size_t size;
+    std::size_t alignment;
+  };
+
   void *alloc_from_buffer(std::size_t bytes, std::size_t alignment)
   {
     std::uintptr_t off =
         reinterpret_cast<std::uintptr_t>(buffer_.data()) % alignment;
+    off = (alignment - off) % alignment;
+
     if (off > buffer_.size_bytes())
       return nullptr;
     buffer_ = buffer_.subspan(off);
@@ -96,8 +131,12 @@ private:
 
   void request_from_upstream()
   {
-    auto *p = upstream_->allocate(next_buffer_bytes_);
-    blocks_.emplace_back(p, next_buffer_bytes_, sizeof(std::max_align_t));
+    auto *p = upstream_->allocate(next_buffer_bytes_ + sizeof(block_info));
+    std::memcpy(reinterpret_cast<char *>(p) + next_buffer_bytes_, &block_list_,
+                sizeof block_list_);
+    block_list_.ptr = p;
+    block_list_.size = next_buffer_bytes_;
+    block_list_.alignment = sizeof(std::max_align_t);
     buffer_ = span<char>(reinterpret_cast<char *>(p), next_buffer_bytes_);
     next_buffer_bytes_ *= 2;
   }
@@ -131,7 +170,7 @@ private:
   span<char> buffer_;
   memory_resource *upstream_;
   std::size_t next_buffer_bytes_ = 32;
-  std::vector<std::tuple<void *, std::size_t, std::size_t>> blocks_;
+  block_info block_list_{};
 };
 } // namespace pmr
 
