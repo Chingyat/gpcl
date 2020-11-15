@@ -4,6 +4,8 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <memory>
+#include <new>
 
 struct takes_init_and_variadic
 {
