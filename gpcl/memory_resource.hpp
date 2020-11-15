@@ -51,7 +51,7 @@ class monotonic_buffer_resource : public memory_resource
 {
 public:
   monotonic_buffer_resource(void *buffer, std::size_t size,
-                            memory_resource *upstream = new_delete_resource())
+                            memory_resource *upstream = get_default_resource())
       : buffer_(reinterpret_cast<char *>(buffer), size),
         upstream_(upstream)
   {
@@ -59,7 +59,7 @@ public:
 
   explicit monotonic_buffer_resource(
       std::size_t initial_buffer,
-      memory_resource *upstream = new_delete_resource())
+      memory_resource *upstream = get_default_resource())
       : upstream_(upstream),
         next_buffer_bytes_(initial_buffer)
   {
@@ -67,7 +67,7 @@ public:
   }
 
   explicit monotonic_buffer_resource(
-      memory_resource *upstream = new_delete_resource())
+      memory_resource *upstream = get_default_resource())
       : monotonic_buffer_resource(32, upstream)
   {
   }

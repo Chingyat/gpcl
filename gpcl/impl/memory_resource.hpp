@@ -69,18 +69,18 @@ namespace pmr_detail {
 
 std::atomic<memory_resource *> &default_memory_resource()
 {
-  static std::atomic<memory_resource *> instance = new_delete_resource();
+  static std::atomic<memory_resource *> instance = pmr::new_delete_resource();
   return instance;
 }
 
 } // namespace pmr_detail
 
-void set_memory_resource(memory_resource *resource) noexcept
+void set_default_resource(memory_resource *resource) noexcept
 {
   pmr_detail::default_memory_resource() = resource;
 }
 
-memory_resource *get_memory_resource() noexcept
+memory_resource *get_default_resource() noexcept
 {
   return pmr_detail::default_memory_resource();
 }
