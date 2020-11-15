@@ -1,0 +1,4 @@
+execute_process(
+        COMMAND standardese -c ${GPCL_BINARY_DIR}/standardese.in ${GPCL_HEADERS}
+        WORKING_DIRECTORY "${GPCL_SOURCE_DIR}"
+)

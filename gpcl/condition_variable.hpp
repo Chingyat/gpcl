@@ -29,13 +29,16 @@ enum class cv_status : bool
   timeout
 };
 
+/// Condition variable.
 class condition_variable
 {
 public:
+  /// Implementation defined type.
+  using impl_type =
 #  if defined(GPCL_POSIX)
-  using impl_type = detail::posix_condition_variable;
+      detail::posix_condition_variable;
 #  elif defined(GPCL_WINDOWS)
-  using impl_type = detail::win_condition_variable;
+      detail::win_condition_variable;
 #  endif
 
   condition_variable() = default;
@@ -61,22 +64,24 @@ public:
     }
   }
 
-  template <typename Clock, typename Duration,
-            typename std::enable_if<std::is_same<Clock, system_clock>::value,
-                                    int>::type = 0>
-  cv_status wait_until(unique_lock<mutex> &lock,
-                       chrono::time_point<Clock, Duration> const &timeout_time)
+  template <typename Clock, typename Duration>
+  cv_status
+  wait_until(unique_lock<mutex> &lock,
+             chrono::time_point<Clock, Duration> const &timeout_time,
+             typename std::enable_if<std::is_same<Clock, system_clock>::value,
+                                     int>::type = 0)
   {
     unique_lock_adaptor lock_adaptor(lock);
     return static_cast<cv_status>(
         impl_.wait_until(lock_adaptor.get_impl_lock(), timeout_time));
   }
 
-  template <typename Clock, typename Duration,
-            typename std::enable_if<!std::is_same<Clock, system_clock>::value,
-                                    int>::type = 0>
-  cv_status wait_until(unique_lock<mutex> &lock,
-                       chrono::time_point<Clock, Duration> const &timeout_time)
+  template <typename Clock, typename Duration>
+  cv_status
+  wait_until(unique_lock<mutex> &lock,
+             chrono::time_point<Clock, Duration> const &timeout_time,
+             typename std::enable_if<!std::is_same<Clock, system_clock>::value,
+                                     int>::type = 0)
   {
     unique_lock_adaptor lock_adaptor(lock);
     return static_cast<cv_status>(impl_.wait_for(lock_adaptor.get_impl_lock(),

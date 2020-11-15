@@ -23,6 +23,7 @@ namespace gpcl {
 
 class condition_variable;
 
+/// Dummy mutex that does not synchronise any threads.
 class GPCL_CAPABILITY("mutex") null_mutex : noncopyable
 {
 public:
@@ -55,6 +56,7 @@ private:
 #endif
 };
 
+/// Normal mutex.
 class GPCL_CAPABILITY("mutex") mutex : noncopyable
 {
 public:
@@ -91,6 +93,7 @@ private:
   impl_type impl_;
 };
 
+/// Timed mutex.
 class GPCL_CAPABILITY("mutex") timed_mutex : noncopyable
 {
 public:
@@ -154,6 +157,7 @@ private:
   impl_type impl_;
 };
 
+/// Reentrant mutex.
 class recursive_mutex : noncopyable
 {
 public:

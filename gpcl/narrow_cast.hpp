@@ -13,14 +13,16 @@
 
 #include <gpcl/assert.hpp>
 #include <gpcl/detail/config.hpp>
+#include <exception>
 #include <type_traits>
 
 namespace gpcl {
 
 template <typename To, typename From>
-To narrow_cast(From F) noexcept {
+To narrow_cast(From F) noexcept
+{
   static_assert(std::is_integral<From>() && std::is_integral<To>(),
-      "Both From and To must be integral type");
+                "Both From and To must be integral type");
 
   To T = static_cast<To>(F);
   GPCL_ASSERT(static_cast<From>(T) == F);
@@ -28,7 +30,8 @@ To narrow_cast(From F) noexcept {
   return T;
 }
 
-class bad_narrow_cast : public std::exception {
+class bad_narrow_cast : public std::exception
+{
 public:
   bad_narrow_cast() = default;
 
@@ -36,9 +39,10 @@ public:
 };
 
 template <typename To, typename From>
-To narrow(From F) noexcept {
+To narrow(From F) noexcept
+{
   static_assert(std::is_integral<From>() && std::is_integral<To>(),
-      "Both From and To must be integral type");
+                "Both From and To must be integral type");
 
   To T = static_cast<To>(F);
   if (static_cast<From>(T) != F)

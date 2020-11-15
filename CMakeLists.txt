@@ -46,58 +46,10 @@ set(GPCL_HEADERS
         gpcl/assert.hpp
         gpcl/clock.hpp
         gpcl/condition_variable.hpp
-        gpcl/detail/chrono.hpp
-        gpcl/detail/config.hpp
-        gpcl/detail/error.hpp
-        gpcl/detail/expected.hpp
-        gpcl/detail/impl/error.ipp
-        gpcl/detail/impl/posix_clock.ipp
-        gpcl/detail/impl/posix_condition_variable.ipp
-        gpcl/detail/impl/posix_mutex.ipp
-        gpcl/detail/impl/posix_semaphore.ipp
-        gpcl/detail/impl/posix_thread.ipp
-        gpcl/detail/impl/posix_timer.ipp
-        gpcl/detail/impl/unique_file_descriptor.ipp
-        gpcl/detail/impl/unique_handle.ipp
-        gpcl/detail/impl/unreachable.ipp
-        gpcl/detail/impl/win_clock.ipp
-        gpcl/detail/impl/win_condition_variable.ipp
-        gpcl/detail/impl/win_mutex.ipp
-        gpcl/detail/impl/win_semaphore.ipp
-        gpcl/detail/impl/win_thread.ipp
-        gpcl/detail/impl/posix_message_queue.ipp
-        gpcl/detail/optional.hpp
-        gpcl/detail/posix_clock.hpp
-        gpcl/detail/posix_condition_variable.hpp
-        gpcl/detail/posix_mutex.hpp
-        gpcl/detail/posix_semaphore.hpp
-        gpcl/detail/posix_thread.hpp
-        gpcl/detail/posix_timer.hpp
-        gpcl/detail/thread_annotations.hpp
-        gpcl/detail/type_traits.hpp
-        gpcl/detail/unique_file_descriptor.hpp
-        gpcl/detail/unique_handle.hpp
-        gpcl/detail/unreachable.hpp
-        gpcl/detail/utility.hpp
-        gpcl/detail/win_clock.hpp
-        gpcl/detail/win_condition_variable.hpp
-        gpcl/detail/win_mutex.hpp
-        gpcl/detail/win_semaphore.hpp
-        gpcl/detail/win_thread.hpp
-        gpcl/detail/posix_message_queue.hpp
         gpcl/error.hpp
         gpcl/event.hpp
         gpcl/expected.hpp
         gpcl/expected_fwd.hpp
-        gpcl/ext/detail/config.hpp
-        gpcl/ext/impl/mqtt.ipp
-        gpcl/ext/impl/sqlite.ipp
-        gpcl/ext/mqtt.hpp
-        gpcl/ext/sqlite.hpp
-        gpcl/impl/expected.hpp
-        gpcl/impl/ext-src.hpp
-        gpcl/impl/offset_ptr.hpp
-        gpcl/impl/src.hpp
         gpcl/in_place_t.hpp
         gpcl/is_basic_lockable.hpp
         gpcl/is_lockable.hpp
@@ -131,12 +83,18 @@ target_include_directories(gpcl INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 install(DIRECTORY include/gpcl DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES include/gpcl.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/vendor/Catch2")
-    set(CATCH_BUILD_TESTING OFF)
-    add_subdirectory(vendor/Catch2)
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/Catch2/extras")
-else ()
-    find_package(Catch2 REQUIRED)
-endif ()
+set(CATCH_BUILD_TESTING OFF)
+add_subdirectory(vendor/Catch2)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/Catch2/extras")
 
-add_subdirectory(tests)
+enable_testing()
+include(CTest)
+include(Catch)
+
+add_executable(tests ${GPCL_HEADERS} tests/expected_test.cpp)
+target_link_libraries(tests PRIVATE gpcl::gpcl Catch2::Catch2WithMain)
+
+catch_discover_tests(tests)
+
+configure_file(tools/standardese.ini.in standardese.in)
+configure_file(tools/build_doc.cmake.in build_doc.cmake)

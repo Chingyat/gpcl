@@ -1,9 +1,20 @@
+//
+// memory_resource.hpp
+// ~~~~~~~~~~~~~~~~~~~
+//
+// Copyright (c) 2020 Zhengyi Fu (tsingyat at outlook dot com)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #ifndef GPCL_MEMORY_RESOURCE_HPP
 #define GPCL_MEMORY_RESOURCE_HPP
 
-#include <gpcl/detail/config.hpp>
 #include <gpcl/buffer.hpp>
+#include <gpcl/detail/config.hpp>
 #include <cstddef> // for max_align_t
+#include <cstring>
 
 namespace gpcl {
 inline namespace pmr {
@@ -79,10 +90,7 @@ public:
   {
   }
 
-  ~monotonic_buffer_resource()
-  {
-    release();
-  }
+  ~monotonic_buffer_resource() { release(); }
 
   void release()
   {
@@ -101,10 +109,7 @@ public:
     GPCL_VERIFY(block_list_.size == 0);
   }
 
-  memory_resource* upstream_resource() const
-  {
-    return upstream_;
-  }
+  memory_resource *upstream_resource() const { return upstream_; }
 
 private:
   struct block_info

@@ -22,6 +22,8 @@
 namespace gpcl {
 
 #if defined(GPCL_POSIX) || defined(GPCL_WINDOWS)
+
+/// Thread.
 class thread {
 public:
 #if defined(GPCL_POSIX)

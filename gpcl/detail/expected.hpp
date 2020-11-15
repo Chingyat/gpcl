@@ -732,7 +732,7 @@ public:
 template <typename T, typename E>
 class expected_copy_assign_base<
     T, E,
-    std::enable_if_t<detail::is_void_v<T> && !std::is_trivially_copyable_v<E> &&
+    std::enable_if_t<detail::is_void_v<T> && !std::is_trivially_copyable<E>::value &&
                      detail::is_copy_constructible_v<E> &&
                      detail::is_copy_assignable_v<E>>>
     : public expected_move_base<T, E>
