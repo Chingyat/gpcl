@@ -36,7 +36,7 @@ struct default_malloc_free_user_allocator
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;
 
-  [[nodiscard]] static char *malloc(size_type sz)
+  [[nodiscard]] static char *malloc(size_type sz) noexcept
   {
     return static_cast<char *>(std::malloc(sz));
   }
@@ -49,7 +49,7 @@ struct default_new_delete_user_allocator
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;
 
-  [[nodiscard]] static char *malloc(size_type sz)
+  [[nodiscard]] static char *malloc(size_type sz) noexcept
   {
     return reinterpret_cast<char *>(::operator new[](sz, std::nothrow));
   }

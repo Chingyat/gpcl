@@ -5,10 +5,12 @@
 #include <gpcl/memory_resource.hpp>
 
 #include <atomic>
+#include <new>
 
 namespace gpcl {
+inline namespace pmr {
 
-namespace detail {
+namespace pmr_detail {
 class null_memory_resource_impl : public memory_resource
 {
   void *do_allocate(std::size_t bytes, std::size_t alignment) override
@@ -18,10 +20,10 @@ class null_memory_resource_impl : public memory_resource
     throw std::bad_alloc();
   }
 
-  void do_deallocate(void *p, std::size_t bytes, std::size_t aligement) override
+  void do_deallocate(void *p, std::size_t bytes, std::size_t alignment) override
   {
     (void)bytes;
-    (void)aligement;
+    (void)alignment;
   }
 
   bool do_is_equal(const memory_resource &other) const noexcept override
@@ -29,15 +31,15 @@ class null_memory_resource_impl : public memory_resource
     return &other == this;
   }
 };
-} // namespace detail
+} // namespace pmr_detail
 
 memory_resource *null_memory_resource() noexcept
 {
-  static detail::null_memory_resource_impl instance_;
+  static pmr_detail::null_memory_resource_impl instance_;
   return &instance_;
 }
 
-namespace detail {
+namespace pmr_detail {
 
 class new_delete_resource_impl : public memory_resource
 {
@@ -45,9 +47,9 @@ class new_delete_resource_impl : public memory_resource
   {
     return ::operator new[](bytes, std::align_val_t(alignment));
   }
-  void do_deallocate(void *p, std::size_t bytes, std::size_t aligement) override
+  void do_deallocate(void *p, std::size_t bytes, std::size_t alignment) override
   {
-    ::operator delete[](p, bytes);
+    ::operator delete[](p, bytes, std::align_val_t(alignment));
   }
   bool do_is_equal(const memory_resource &other) const noexcept override
   {
@@ -55,15 +57,15 @@ class new_delete_resource_impl : public memory_resource
   }
 };
 
-} // namespace detail
+} // namespace pmr_detail
 
 memory_resource *new_delete_resource() noexcept
 {
-  static detail::new_delete_resource_impl instance;
+  static pmr_detail::new_delete_resource_impl instance;
   return &instance;
 }
 
-namespace detail {
+namespace pmr_detail {
 
 std::atomic<memory_resource *> &default_memory_resource()
 {
@@ -71,18 +73,19 @@ std::atomic<memory_resource *> &default_memory_resource()
   return instance;
 }
 
-} // namespace detail
+} // namespace pmr_detail
 
 void set_memory_resource(memory_resource *resource) noexcept
 {
-  detail::default_memory_resource() = resource;
+  pmr_detail::default_memory_resource() = resource;
 }
 
 memory_resource *get_memory_resource() noexcept
 {
-  return detail::default_memory_resource();
+  return pmr_detail::default_memory_resource();
 }
 
+} // namespace pmr
 } // namespace gpcl
 
 #endif // GPCL_IMPL_MEMORY_RESOURCE_HPP
