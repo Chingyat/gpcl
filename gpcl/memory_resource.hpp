@@ -2,11 +2,12 @@
 #define GPCL_MEMORY_RESOURCE_HPP
 
 #include <gpcl/detail/config.hpp>
+#include <gpcl/buffer.hpp>
 #include <cstddef> // for max_align_t
 
 namespace gpcl {
-
 inline namespace pmr {
+
 class memory_resource
 {
 public:
@@ -121,11 +122,11 @@ private:
 
     if (off > buffer_.size_bytes())
       return nullptr;
-    buffer_ = buffer_.subspan(off);
+    buffer_ += off;
     if (buffer_.size_bytes() < bytes)
       return nullptr;
     auto *ret = buffer_.data();
-    buffer_ = buffer_.subspan(bytes);
+    buffer_ += bytes;
     return ret;
   }
 
@@ -137,7 +138,7 @@ private:
     block_list_.ptr = p;
     block_list_.size = next_buffer_bytes_;
     block_list_.alignment = sizeof(std::max_align_t);
-    buffer_ = span<char>(reinterpret_cast<char *>(p), next_buffer_bytes_);
+    buffer_ = buffer(p, next_buffer_bytes_);
     next_buffer_bytes_ *= 2;
   }
 
@@ -167,7 +168,7 @@ private:
     return &other == this;
   }
 
-  span<char> buffer_;
+  mutable_buffer buffer_;
   memory_resource *upstream_;
   std::size_t next_buffer_bytes_ = 32;
   block_info block_list_{};

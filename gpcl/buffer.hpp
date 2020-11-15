@@ -37,11 +37,21 @@ buffer(const T &obj,
   return const_buffer(reinterpret_cast<const char *>(obj), sizeof obj);
 }
 
+inline const_buffer buffer(const void *data, std::size_t size)
+{
+  return const_buffer(reinterpret_cast<const char *>(data), size);
+}
+
 template <typename T>
 mutable_buffer
 buffer(T &obj, std::enable_if_t<std::is_standard_layout<T>::value> * = nullptr)
 {
   return mutable_buffer(reinterpret_cast<char *>(obj), sizeof obj);
+}
+
+inline mutable_buffer buffer(void *data, std::size_t size)
+{
+  return mutable_buffer(reinterpret_cast<char *>(data), size);
 }
 
 } // namespace gpcl
