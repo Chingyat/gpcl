@@ -11,11 +11,11 @@
 #include <gpcl/expected.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <memory>
+#include <new>
 #include <string>
 #include <type_traits>
 #include <vector>
-#include <memory>
-#include <new>
 
 struct takes_init_and_variadic
 {
@@ -288,4 +288,35 @@ TEST_CASE("Observers", "[observers]")
   move_detector o5 = std::move(o4).value();
   REQUIRE(o4->been_moved);
   REQUIRE(!o5.been_moved);
+}
+
+gpcl::expected<int, int> return_success() { return 1; }
+
+gpcl::expected<int, int> return_failure() { return gpcl::make_unexpected(0); }
+
+template <typename Func>
+gpcl::expected<void, int> test_try(Func &&func)
+{
+  GPCL_EXPECTED_TRY(re, func());
+  return {};
+}
+
+#ifdef __GNUC__
+template <typename Func>
+gpcl::expected<void, int> test_try_return(Func &&func)
+{
+  auto e = GPCL_EXPECTED_TRY_RETURN(func());
+  return {};
+}
+#endif
+
+TEST_CASE("extension", "[extension]")
+{
+  CHECK(test_try(return_success));
+  CHECK(!test_try(return_failure));
+
+#ifdef __GNUC__
+  CHECK(test_try_return(return_success));
+  CHECK(!test_try_return(return_failure));
+#endif
 }

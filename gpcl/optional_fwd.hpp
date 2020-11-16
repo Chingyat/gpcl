@@ -25,68 +25,6 @@ constexpr nullopt_t nullopt = nullopt_t::nullopt;
 // class bad_optional_access
 class bad_optional_access;
 
-// relational operators
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator==(
-    const optional<T> &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator!=(
-    const optional<T> &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator<(
-    const optional<T> &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator>(
-    const optional<T> &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator<=(
-    const optional<T> &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator>=(
-    const optional<T> &, const optional<U> &);
-
-template <typename T>
-GPCL_DECL_INLINE constexpr bool operator==(
-    const optional<T> &, nullopt_t) noexcept;
-
-// comparison with T
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator==(const optional<T> &, const U &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator==(const T &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator!=(const optional<T> &, const U &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator!=(const T &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator<(const optional<T> &, const U &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator<(const T &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator>(const optional<T> &, const U &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator>(const T &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator<=(const optional<T> &, const U &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator<=(const T &, const optional<U> &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator>=(const optional<T> &, const U &);
-template <typename T, class U>
-GPCL_DECL_INLINE constexpr bool operator>=(const T &, const optional<U> &);
-
-// specialized algorithms
-template <typename T> void swap(optional<T> &, optional<T> &) noexcept(true);
-
-template <typename T>
-GPCL_DECL_INLINE constexpr optional<typename std::decay<T>::type> make_optional(
-    T &&);
-template <typename T, class... Args>
-GPCL_DECL_INLINE constexpr optional<T> make_optional(Args &&... args);
-template <typename T, class U, class... Args>
-GPCL_DECL_INLINE constexpr optional<T> make_optional(
-    std::initializer_list<U> il, Args &&... args);
-
 // hash support
 template <typename T> struct hash;
 template <typename T> struct hash<optional<T>>;

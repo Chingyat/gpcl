@@ -55,7 +55,7 @@
 # define GPCL_XENOMAI
 #endif
 
-#if !defined(_WIN32) || defined(__COBALT__)
+#ifdef __linux__
 # define GPCL_POSIX
 #endif
 
@@ -86,6 +86,9 @@
 #  define GPCL_CXX17_IF_CONSTEXPR if constexpr
 # endif
 #endif
+
+//#undef GPCL_NO_EXCEPTIONS
+#define GPCL_NO_EXCEPTIONS 1
 
 /// Main namespace of GPCL
 namespace gpcl {

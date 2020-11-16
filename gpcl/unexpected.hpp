@@ -219,12 +219,14 @@ swap(unexpected<E> &lhs,
   lhs.swap(rhs);
 }
 
+/// Create an unexpect value.
 template <typename E>
 unexpected<typename std::decay<E>::type> make_unexpected(E &&e)
 {
   return unexpected<typename std::decay<E>::type>(std::forward<E>(e));
 }
 
+/// Create an unexpected<error_code> from error code enum.
 template <typename ErrC>
 unexpected<error_code> make_unexpected_error_code(ErrC e)
 {

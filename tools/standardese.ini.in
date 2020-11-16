@@ -9,3 +9,4 @@ extract_private=true
 
 [output]
 prefix=@GPCL_BINARY_DIR@/doc/
+format=commonmark
