@@ -19,16 +19,19 @@ namespace gpcl {
 using const_buffer = span<const char>;
 using mutable_buffer = span<char>;
 
+/// Consume some bytes of the buffer.
 inline const_buffer &operator+=(const_buffer &buf, std::size_t sz)
 {
   return buf = buf.subspan(sz);
 }
 
+/// Consume some bytes of the buffer.
 inline mutable_buffer &operator+=(mutable_buffer &buf, std::size_t sz)
 {
   return buf = buf.subspan(sz);
 }
 
+/// Create a buffer from a standard layout object.
 template <typename T>
 const_buffer
 buffer(const T &obj,
@@ -37,11 +40,13 @@ buffer(const T &obj,
   return const_buffer(reinterpret_cast<const char *>(obj), sizeof obj);
 }
 
+/// Create a buffer from raw memory.
 inline const_buffer buffer(const void *data, std::size_t size)
 {
   return const_buffer(reinterpret_cast<const char *>(data), size);
 }
 
+/// Create a buffer from a standard layout object.
 template <typename T>
 mutable_buffer
 buffer(T &obj, std::enable_if_t<std::is_standard_layout<T>::value> * = nullptr)
@@ -49,9 +54,29 @@ buffer(T &obj, std::enable_if_t<std::is_standard_layout<T>::value> * = nullptr)
   return mutable_buffer(reinterpret_cast<char *>(obj), sizeof obj);
 }
 
+/// Create a buffer from raw memory.
 inline mutable_buffer buffer(void *data, std::size_t size)
 {
   return mutable_buffer(reinterpret_cast<char *>(data), size);
+}
+
+/// Make a buffer from a contiguous container.
+template <typename T>
+mutable_buffer
+buffer(T &obj, detail::void_t<decltype(std::declval<T &>().data(),
+                                       std::declval<T &>().size())> * = nullptr)
+{
+  return as_writable_bytes(span<typename T::value_type>(obj));
+}
+
+/// Make a buffer from a contiguous container.
+template <typename T>
+const_buffer
+buffer(const T &obj,
+       detail::void_t<decltype(std::declval<const T &>().data(),
+                               std::declval<const T &>().size())> * = nullptr)
+{
+  return as_bytes(span<typename T::value_type>(obj));
 }
 
 } // namespace gpcl

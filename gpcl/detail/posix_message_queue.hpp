@@ -22,7 +22,7 @@
 #include <system_error>
 
 #ifdef GPCL_POSIX
-#include <mqueue.h>
+#  include <mqueue.h>
 
 namespace gpcl {
 namespace detail {
@@ -41,6 +41,7 @@ public:
   GPCL_DECL posix_message_queue(open_only_t, czstring<> name);
 
   GPCL_DECL_INLINE posix_message_queue() : q_(-1) {}
+
   GPCL_DECL_INLINE posix_message_queue(posix_message_queue &&other) noexcept
       : q_(std::exchange(other.q_, -1))
   {
@@ -53,6 +54,7 @@ public:
     swap(q_, other.q_);
     return *this;
   }
+
   GPCL_DECL ~posix_message_queue() noexcept;
 
   GPCL_DECL static void unlink(czstring<> name, std::error_code &ec);
@@ -97,7 +99,7 @@ private:
 #endif
 
 #ifdef GPCL_HEADER_ONLY
-#include <gpcl/detail/impl/posix_message_queue.ipp>
+#  include <gpcl/detail/impl/posix_message_queue.ipp>
 #endif
 
 #endif // GPCL_POSIX_posix_message_queue_HPP
