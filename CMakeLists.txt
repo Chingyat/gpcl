@@ -91,10 +91,15 @@ enable_testing()
 include(CTest)
 include(Catch)
 
-add_executable(tests ${GPCL_HEADERS} tests/expected_test.cpp)
+add_executable(tests
+        ${GPCL_HEADERS}
+        tests/expected_test.cpp
+        tests/monotonic_buffer_resource_test.cpp
+        )
 target_link_libraries(tests PRIVATE gpcl::gpcl Catch2::Catch2WithMain)
 
 catch_discover_tests(tests)
 
 configure_file(tools/standardese.ini.in standardese.in)
-configure_file(tools/build_doc.cmake.in build_doc.cmake)
+configure_file(tools/build_doc.cmake.in build_doc.cmake @ONLY)
+configure_file(tools/add_copyright.cmake.in add_copyright.cmake @ONLY)

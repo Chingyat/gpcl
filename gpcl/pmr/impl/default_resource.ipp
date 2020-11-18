@@ -12,6 +12,7 @@
 #define GPCL_PMR_IMPL_DEFAULT_RESOURCE_IPP
 
 #include <gpcl/pmr/default_resource.hpp>
+#include <gpcl/pmr/new_delete_resource.hpp>
 
 #include <atomic>
 
@@ -31,7 +32,7 @@ std::atomic<memory_resource *> &default_memory_resource()
 void set_default_resource(memory_resource *resource) noexcept
 {
   pmr_detail::default_memory_resource().store(resource,
-                                              std::memory_order_acq_rel);
+                                              std::memory_order_release);
 }
 
 memory_resource *get_default_resource() noexcept

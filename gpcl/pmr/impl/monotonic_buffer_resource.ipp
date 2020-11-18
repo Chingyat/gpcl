@@ -45,7 +45,8 @@ void monotonic_buffer_resource::release()
     std::memcpy(&next,
                 reinterpret_cast<char *>(block_list_.ptr) + block_list_.size,
                 sizeof(next));
-    upstream_->deallocate(block_list_.ptr, block_list_.size,
+    upstream_->deallocate(block_list_.ptr,
+                          block_list_.size + sizeof(block_info),
                           block_list_.alignment);
     block_list_ = next;
   }
@@ -78,7 +79,7 @@ void monotonic_buffer_resource::request_from_upstream()
               sizeof block_list_);
   block_list_.ptr = p;
   block_list_.size = next_buffer_bytes_;
-  block_list_.alignment = sizeof(std::max_align_t);
+  block_list_.alignment = alignof(std::max_align_t);
   buffer_ = buffer(p, next_buffer_bytes_);
   next_buffer_bytes_ *= 2;
 }
