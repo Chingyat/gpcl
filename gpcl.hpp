@@ -21,7 +21,7 @@
 #include <gpcl/event.hpp>
 #include <gpcl/expected.hpp>
 #include <gpcl/expected_fwd.hpp>
-#include <gpcl/in_place_t.hpp>
+#include <gpcl/in_place.hpp>
 #include <gpcl/is_basic_lockable.hpp>
 #include <gpcl/is_lockable.hpp>
 #include <gpcl/message_queue.hpp>

@@ -50,7 +50,7 @@ set(GPCL_HEADERS
         gpcl/event.hpp
         gpcl/expected.hpp
         gpcl/expected_fwd.hpp
-        gpcl/in_place_t.hpp
+        gpcl/in_place.hpp
         gpcl/is_basic_lockable.hpp
         gpcl/is_lockable.hpp
         gpcl/mutex.hpp
@@ -74,7 +74,19 @@ set(GPCL_HEADERS
         gpcl/ext.hpp
         gpcl/buffer.hpp
         gpcl/simple_segregated_storage.hpp
-        gpcl/pool_allocator.hpp)
+        gpcl/pool_allocator.hpp
+        gpcl/execution/any_executor.hpp
+        gpcl/execution/traits.hpp
+        gpcl/execution/execute.hpp
+        gpcl/execution/invocable_archetypal_type.hpp
+        gpcl/clone_ptr.hpp
+        gpcl/pmr/default_resource.hpp
+        gpcl/pmr/null_memory_resource.hpp
+        gpcl/pmr/new_delete_resource.hpp
+        gpcl/pmr/monotonic_buffer_resource.hpp
+        gpcl/pmr/polymorphic_allocator.hpp
+        gpcl/execution/allocator.hpp
+        )
 
 add_library(gpcl INTERFACE)
 add_library(gpcl::gpcl ALIAS gpcl)

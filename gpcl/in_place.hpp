@@ -8,16 +8,18 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef GPCL_IN_PLACE_T_HPP
-#define GPCL_IN_PLACE_T_HPP
+#ifndef GPCL_IN_PLACE_HPP
+#define GPCL_IN_PLACE_HPP
 
 #include <gpcl/detail/config.hpp>
 
 namespace gpcl {
 
-enum class in_place_t { in_place };
-constexpr auto in_place = in_place_t::in_place;
+enum class in_place_t
+{
+};
+constexpr auto in_place = in_place_t();
 
 } // namespace gpcl
 
-#endif // GPCL_IN_PLACE_T_HPP
+#endif // GPCL_IN_PLACE_HPP
