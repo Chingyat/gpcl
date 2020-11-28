@@ -98,3 +98,4 @@ catch_discover_tests(tests)
 
 configure_file(tools/standardese.ini.in standardese.in)
 configure_file(tools/build_doc.cmake.in build_doc.cmake)
+configure_file(tools/add_copyright.cmake.in add_copyright.cmake)
