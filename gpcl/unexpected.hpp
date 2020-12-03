@@ -211,7 +211,7 @@ template <typename E>
 unexpected(E) -> unexpected<E>;
 #endif
 
-template <typename E, std::enable_if_t<detail::is_swappable<E>::value, int>>
+template <typename E, std::enable_if_t<detail::is_swappable<E>::value, int> = 0>
 GPCL_DECL_INLINE void
 swap(unexpected<E> &lhs,
      unexpected<E> &rhs) noexcept(detail::is_nothrow_swappable<E>::value)
@@ -219,12 +219,14 @@ swap(unexpected<E> &lhs,
   lhs.swap(rhs);
 }
 
+/// Create an unexpect value.
 template <typename E>
 unexpected<typename std::decay<E>::type> make_unexpected(E &&e)
 {
   return unexpected<typename std::decay<E>::type>(std::forward<E>(e));
 }
 
+/// Create an unexpected<error_code> from error code enum.
 template <typename ErrC>
 unexpected<error_code> make_unexpected_error_code(ErrC e)
 {

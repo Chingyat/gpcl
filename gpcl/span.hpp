@@ -102,7 +102,7 @@ public:
 
   constexpr span() noexcept = default;
 
-  template <typename It> // requirse ContiguousIterator<It>
+  template <typename It> // requires ContiguousIterator<It>
   GPCL_DECL_INLINE constexpr span(It first, size_type count)
       : base_type(std::addressof(*first), count)
   {
@@ -111,28 +111,30 @@ public:
   template <
       typename It, typename End,
       std::enable_if_t<detail::negate_v<std::is_convertible<End, std::size_t>>,
-                       int> = 0> // requires ContiguousIterator<It>
+                       int>
+          Dummy = 0> // requires ContiguousIterator<It>
   GPCL_DECL_INLINE constexpr span(It first, End last)
       : base_type(std::addressof(*first),
                   std::addressof(*last) - std::addressof(*first))
   {
   }
 
-  template <std::size_t N, std::enable_if_t<N == E || E == dynamic_extent>>
+  template <std::size_t N,
+            std::enable_if_t<N == E || E == dynamic_extent, int> = 0>
   GPCL_DECL_INLINE constexpr span(element_type (&arr)[N]) noexcept
       : base_type(arr, N)
   {
   }
 
   template <typename U, std::size_t N,
-            std::enable_if_t<N == E || E == dynamic_extent>>
+            std::enable_if_t<N == E || E == dynamic_extent, int> = 0>
   GPCL_DECL_INLINE constexpr span(std::array<U, N> &arr) noexcept
       : base_type(arr.data(), N)
   {
   }
 
   template <typename U, std::size_t N,
-            std::enable_if_t<N == E || E == dynamic_extent>>
+            std::enable_if_t<N == E || E == dynamic_extent, int> = 0>
   GPCL_DECL_INLINE constexpr span(const std::array<U, N> &arr) noexcept
       : base_type(arr.data(), N)
   {
@@ -159,10 +161,12 @@ public:
   {
     return iterator{data()};
   }
+
   [[nodiscard]] GPCL_DECL_INLINE constexpr iterator end() const noexcept
   {
     return begin() + size();
   }
+
   [[nodiscard]] GPCL_DECL_INLINE constexpr iterator rbegin() const noexcept
   {
     return std::make_reverse_iterator(end());
@@ -177,6 +181,7 @@ public:
   {
     return *begin();
   }
+
   [[nodiscard]] GPCL_DECL_INLINE constexpr reference back() const
   {
     return *rbegin();

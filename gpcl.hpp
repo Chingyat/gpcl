@@ -14,6 +14,7 @@
 #include <gpcl/assert.hpp>
 #include <gpcl/buffer.hpp>
 #include <gpcl/clock.hpp>
+#include <gpcl/clone_ptr.hpp>
 #include <gpcl/condition_variable.hpp>
 #include <gpcl/creation_tag.hpp>
 #include <gpcl/error.hpp>
@@ -23,7 +24,6 @@
 #include <gpcl/in_place_t.hpp>
 #include <gpcl/is_basic_lockable.hpp>
 #include <gpcl/is_lockable.hpp>
-#include <gpcl/memory_resource.hpp>
 #include <gpcl/message_queue.hpp>
 #include <gpcl/mutex.hpp>
 #include <gpcl/narrow_cast.hpp>

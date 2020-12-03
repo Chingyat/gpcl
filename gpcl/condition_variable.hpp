@@ -41,6 +41,7 @@ public:
       detail::win_condition_variable;
 #  endif
 
+  /// Default constructor.
   condition_variable() = default;
 
   condition_variable(const condition_variable &) = delete;

@@ -959,6 +959,15 @@ constexpr bool operator!=(const unexpected<E> &x, const expected<T, E> &y)
   }                                                                            \
   auto &&var = *_gpcl_expected_##var;
 
+#define GPCL_EXPECTED_TRY_RETURN(exp)                                          \
+  (                                                                            \
+      {                                                                        \
+        auto tmp = exp;                                                        \
+        if (!tmp)                                                              \
+          return ::gpcl::make_unexpected(tmp.error());                         \
+        *tmp;                                                                  \
+      })
+
 } // namespace gpcl
 
 #ifndef GPCL_STANDARDESE
