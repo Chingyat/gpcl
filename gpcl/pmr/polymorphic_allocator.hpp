@@ -125,6 +125,8 @@ public:
   /// \throws nothing.
   memory_resource *resource() const { return res_; }
 
+  // todo: construct() and destroy()
+
 private:
   memory_resource *res_;
 };

@@ -12,7 +12,7 @@
 #define GPCL_OPTIONAL_FWD_HPP
 
 #include <gpcl/detail/config.hpp>
-#include <gpcl/in_place_t.hpp>
+#include <gpcl/in_place.hpp>
 #include <initializer_list>
 #include <type_traits>
 

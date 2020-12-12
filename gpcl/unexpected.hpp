@@ -17,7 +17,7 @@
 #include <gpcl/detail/utility.hpp>
 #include <gpcl/error.hpp>
 #include <gpcl/expected_fwd.hpp>
-#include <gpcl/in_place_t.hpp>
+#include <gpcl/in_place.hpp>
 
 namespace gpcl {
 

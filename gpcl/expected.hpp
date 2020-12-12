@@ -16,7 +16,7 @@
 #include <gpcl/detail/type_traits.hpp>
 #include <gpcl/detail/utility.hpp>
 #include <gpcl/expected_fwd.hpp>
-#include <gpcl/in_place_t.hpp>
+#include <gpcl/in_place.hpp>
 #include <gpcl/optional_fwd.hpp>
 #include <gpcl/unexpected.hpp>
 #include <exception>
