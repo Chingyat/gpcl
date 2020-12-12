@@ -37,7 +37,7 @@ protected:
 
   ~intrusive_list_node() noexcept
   {
-    assert(prev == this && next == this);
+    GPCL_ASSERT(prev == this && next == this);
   }
 
   void init() noexcept
@@ -249,13 +249,13 @@ public:
 
   reference back() const
   {
-    assert(!empty());
+    GCPL_ASSERT(!empty());
     return *pointer(head_.prev);
   }
 
   reference front() const
   {
-    assert(!empty());
+    GPCL_ASSERT(!empty());
     return *pointer(head_.next);
   }
 
