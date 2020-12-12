@@ -75,17 +75,12 @@ set(GPCL_HEADERS
         gpcl/buffer.hpp
         gpcl/simple_segregated_storage.hpp
         gpcl/pool_allocator.hpp
-        gpcl/execution/any_executor.hpp
-        gpcl/execution/traits.hpp
-        gpcl/execution/execute.hpp
-        gpcl/execution/invocable_archetypal_type.hpp
         gpcl/clone_ptr.hpp
         gpcl/pmr/default_resource.hpp
         gpcl/pmr/null_memory_resource.hpp
         gpcl/pmr/new_delete_resource.hpp
         gpcl/pmr/monotonic_buffer_resource.hpp
         gpcl/pmr/polymorphic_allocator.hpp
-        gpcl/execution/allocator.hpp
         )
 
 add_library(gpcl INTERFACE)
