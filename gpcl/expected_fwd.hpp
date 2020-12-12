@@ -24,18 +24,6 @@ template <typename E> class bad_expected_access;
 
 template <> class bad_expected_access<void>;
 
-template <typename E, std::enable_if_t<detail::is_swappable<E>::value, int> = 0>
-GPCL_DECL_INLINE void swap(unexpected<E> &lhs, unexpected<E> &rhs) noexcept(
-    detail::is_nothrow_swappable<E>::value);
-
-template <typename E1, typename E2>
-GPCL_DECL_INLINE constexpr bool operator==(
-    const unexpected<E1> &x, const unexpected<E2> &y);
-
-template <typename E1, typename E2>
-GPCL_DECL_INLINE constexpr bool operator!=(
-    const unexpected<E1> &x, const unexpected<E2> &y);
-
 } // namespace gpcl
 
 #endif

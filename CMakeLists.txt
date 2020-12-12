@@ -74,14 +74,7 @@ set(GPCL_HEADERS
         gpcl/ext.hpp
         gpcl/buffer.hpp
         gpcl/simple_segregated_storage.hpp
-        gpcl/pool_allocator.hpp
-        gpcl/clone_ptr.hpp
-        gpcl/pmr/default_resource.hpp
-        gpcl/pmr/null_memory_resource.hpp
-        gpcl/pmr/new_delete_resource.hpp
-        gpcl/pmr/monotonic_buffer_resource.hpp
-        gpcl/pmr/polymorphic_allocator.hpp
-        )
+        gpcl/pool_allocator.hpp)
 
 add_library(gpcl INTERFACE)
 add_library(gpcl::gpcl ALIAS gpcl)

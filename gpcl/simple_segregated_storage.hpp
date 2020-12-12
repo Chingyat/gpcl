@@ -26,15 +26,18 @@ class simple_segregated_storage : noncopyable
 public:
   using size_type = SizeType;
 
-
-  /// Segregates a memory block of size sz into as many partition_sz-sized
-  /// chunks as possible.
-  ///
-  /// @param block pointer to the block
-  /// @param sz size in bytes
-  /// @param partition_sz chunk size
-  /// @param end the last chunk's next ptr
-  /// @return pointer to the first chunk.
+  /// \effects Interleaves a free list through the memory block specified of
+  /// `block` of size `sz` bytes, partitioning it into as many
+  /// partition_sz-sized chunks as possible. The last chunk is set to point to
+  /// `end`. \preconditions partition_sz >= sizeof(void *), partition_sz ==
+  /// sizeof(void *) * i for some i, sz >= partition_sz, block is properly
+  /// aligned for an array of objects of size partition_sz, and block is
+  /// properly aligned for an array of void *. \param block pointer to the block
+  /// \param sz size in bytes
+  /// \param partition_sz chunk size
+  /// \param end the last chunk's next ptr
+  /// \returns pointer to the first chunk (this is always equal to block).
+  /// \complexity O(sz).
   void *segregate(void *const block, size_type sz, size_type partition_sz,
                   void *end = nullptr)
   {
@@ -53,13 +56,40 @@ public:
     return block;
   }
 
-  /// Segregates a memory block of size sz, and adds it to the free list.
+  /// \effects Segregates a memory block of size sz, and adds it to the free
+  /// list.
+  ///
+  /// \param block pointer to a block of memory.
+  /// \param sz Size in bytes
+  /// of the memory block.
+  /// \param partition_sz Size per chunk.
+  /// \postconditions !this->empty().
+  ///
+  /// \notes If `this` was empty before calling this function,
+  /// then it is **ordered** after this call.
+  ///
+  /// \complexity O(sz).
   void add_block(void *const block, size_type sz, size_type partition_sz)
   {
     free_list_ = segregate(block, sz, partition_sz, free_list_);
     GPCL_VERIFY(free_list_);
   }
 
+  /// \effects Segregates a memory block of size sz, and adds it to the free
+  /// list.
+  ///
+  /// \param block pointer to a block of memory.
+  /// \param sz Size in bytes
+  /// of the memory block.
+  /// \param partition_sz Size per chunk.
+  ///
+  /// \postconditions
+  /// !this->empty().
+  ///
+  /// \notes If `this` is ordered before calling this function,
+  /// it will remain ordered after calling this function.
+  ///
+  /// \complexity O(sz).
   void add_ordered_block(void *const block, size_type sz,
                          size_type partition_sz)
   {
@@ -68,8 +98,18 @@ public:
     GPCL_VERIFY(free_list_);
   }
 
+  /// \returns true if `this` is empty.
+  /// \notes If `this` is ordered before calling this function, it will remain
+  /// ordered after calling this function.
   bool empty() const { return free_list_ == nullptr; }
 
+  /// \effects Remove the first chunk from the free list.
+  /// \preconditions !this->empty().
+  /// \returns Pointer to the removed chunk.
+  /// \notes If `this` is ordered before calling this function, it will remain
+  /// ordered after calling this function.
+  ///
+  /// \complexity O(1).
   void *malloc(size_type partition_sz)
   {
     GPCL_ASSERT(!empty());
@@ -78,6 +118,17 @@ public:
     return ret;
   }
 
+  /// \effects Attempt to find a sequence a n partition_sz-sized chunks. If
+  /// found, remove them from the free list.
+  ///
+  /// \returns Pointer to the first removed chunk.
+  ///
+  /// \notes It is strongly recommended (but not required) that
+  /// the free list be ordered, as this algorithm will fail to find a contiguous
+  /// sequence unless it is contiguous in the free list as well.
+  /// If `this` is ordered before calling this function, it will remain
+  /// ordered after calling this function.
+  /// \complexity O(N) where N is the size of the free list.
   void *malloc_n(size_type n, size_type partition_sz)
   {
     void **p = &free_list_;
@@ -110,6 +161,11 @@ public:
     return nullptr;
   }
 
+  /// \effects Put chunk back to the free list.
+  ///
+  /// \preconditions chunk was previously returned from a call to this->malloc().
+  ///
+  /// \complexity O(1).
   void free(void *const chunk)
   {
     next_chunk(chunk) = free_list_;

@@ -211,7 +211,7 @@ template <typename E>
 unexpected(E) -> unexpected<E>;
 #endif
 
-template <typename E, std::enable_if_t<detail::is_swappable<E>::value, int>>
+template <typename E, std::enable_if_t<detail::is_swappable<E>::value, int> = 0>
 GPCL_DECL_INLINE void
 swap(unexpected<E> &lhs,
      unexpected<E> &rhs) noexcept(detail::is_nothrow_swappable<E>::value)
