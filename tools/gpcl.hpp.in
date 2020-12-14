@@ -12,6 +12,4 @@
 #define GPCL_HPP
 
 @INCLUDES@
-
 #endif // GPCL_HPP
-

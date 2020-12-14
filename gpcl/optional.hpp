@@ -424,37 +424,37 @@ public:
   /// \group optional.observers
   constexpr const T *operator->() const
   {
-    assert(this->has_val_);
+    GPCL_ASSERT(this->has_val_);
     return &this->val_;
   }
 
   constexpr T *operator->()
   {
-    assert(this->has_val_);
+    GPCL_ASSERT(this->has_val_);
     return &this->val_;
   }
 
   constexpr const T &operator*() const &
   {
-    assert(this->has_val_);
+    GPCL_ASSERT(this->has_val_);
     return this->val_;
   }
 
   constexpr T &operator*() &
   {
-    assert(this->has_val_);
+    GPCL_ASSERT(this->has_val_);
     return this->val_;
   }
 
   constexpr T &&operator*() &&
   {
-    assert(this->has_val_);
+    GPCL_ASSERT(this->has_val_);
     return detail::move(this->val_);
   }
 
   constexpr const T &&operator*() const &&
   {
-    assert(this->has_val_);
+    GPCL_ASSERT(this->has_val_);
     return detail::move(this->val_);
   }
 

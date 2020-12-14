@@ -53,7 +53,7 @@ public:
   using native_handle_type = sqlite3 *;
   auto native_handle() -> native_handle_type
   {
-    assert(db_);
+    GPCL_ASSERT(db_);
     return db_;
   }
 

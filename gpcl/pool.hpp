@@ -77,7 +77,7 @@ public:
         block_list_(),
         next_size_(32)
   {
-    assert(requested_size != 0);
+    GPCL_ASSERT(requested_size != 0);
   }
 
   /// Destructor.
@@ -133,7 +133,7 @@ public:
   /// Allocates memory for an array of n objects of size requested_size.
   [[nodiscard]] void *ordered_malloc(size_type n)
   {
-    assert(n != 0);
+    GPCL_ASSERT(n != 0);
     auto count = chunk_count(n);
     gpcl::unique_lock<mutex_type> lock(mutex_);
     if (auto ret = storage_.malloc_n(count, chunk_size_))

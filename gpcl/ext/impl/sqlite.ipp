@@ -178,14 +178,14 @@ transaction &transaction::operator=(transaction &&other) noexcept
 
 void transaction::begin(database &db)
 {
-  assert(db_ == nullptr);
+  GPCL_ASSERT(db_ == nullptr);
   db.execute("BEGIN TRANSACTION");
   db_ = &db;
 }
 
 void transaction::commit()
 {
-  assert(db_ != nullptr);
+  GPCL_ASSERT(db_ != nullptr);
   auto db = db_;
   db_ = nullptr;
   db->execute("COMMIT");
