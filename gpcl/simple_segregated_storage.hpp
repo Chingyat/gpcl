@@ -163,7 +163,8 @@ public:
 
   /// \effects Put chunk back to the free list.
   ///
-  /// \preconditions chunk was previously returned from a call to this->malloc().
+  /// \preconditions chunk was previously returned from a call to
+  /// this->malloc().
   ///
   /// \complexity O(1).
   void free(void *const chunk)
@@ -172,11 +173,26 @@ public:
     free_list_ = chunk;
   }
 
+  /// \effects Put an array of n chunks back to the free list.
+  ///
+  /// \preconditions the array of chunks was previously returned from a call to
+  /// this->malloc_n().
+  ///
+  /// \complexity O(1).
   void free_n(void *const chunk, size_type partition_sz, size_type n)
   {
     add_block(chunk, partition_sz * n, partition_sz);
   }
 
+  /// \effects Put chunk back to the free list.
+  ///
+  /// \preconditions chunk was previously returned from a call to
+  /// this->malloc().
+  ///
+  /// \notes If `this` is ordered before calling this function,
+  /// it will remain ordered after calling this function.
+  ///
+  /// \complexity O(1).
   void ordered_free(void *const chunk)
   {
     void *&pos = upper_bound(chunk);
@@ -184,6 +200,15 @@ public:
     pos = chunk;
   }
 
+  /// \effects Put an array of n chunks back to the free list.
+  ///
+  /// \preconditions the array of chunks was previously returned from a call to
+  /// this->malloc_n().
+  ///
+  /// \notes If `this` is ordered before calling this function,
+  /// it will remain ordered after calling this function.
+  ///
+  /// \complexity O(1).
   void ordered_free_n(void *const chunk, size_type n, size_type partition_sz)
   {
     add_ordered_block(chunk, partition_sz * n, partition_sz);
@@ -211,7 +236,7 @@ private:
     return *reinterpret_cast<void **>(chunk);
   }
 
-  void *free_list_{};
+  std::atomic<void *> free_list_{};
 };
 
 } // namespace gpcl

@@ -70,8 +70,8 @@ template <
         detail::conjunction_v<
             detail::negate<std::is_void<U>>,
             detail::negate<std::is_same<expected<T, E>, std::decay_t<U>>>,
-            detail::negate<std::conjunction<std::is_scalar<T>,
-                                            std::is_same<T, std::decay_t<U>>>>,
+            detail::negate<detail::conjunction<
+                std::is_scalar<T>, std::is_same<T, std::decay_t<U>>>>,
             std::is_constructible<T, U &&>,
             std::is_assignable<std::add_lvalue_reference_t<T>, U &&>,
             detail::disjunction<std::is_nothrow_constructible<T, U &&>,
