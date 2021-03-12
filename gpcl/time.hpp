@@ -31,7 +31,13 @@ public:
       : secs_(secs),
         nanos_(nanos)
   {
-    GPCL_ASSERT(nanos < 999'999'999);
+    GPCL_ASSERT(nanos <= 999'999'999);
+  }
+
+  GPCL_DECL_INLINE static constexpr duration from_timespec(const timespec *ts)
+  {
+    GPCL_ASSERT(ts);
+    return duration(ts->tv_sec, ts->tv_nsec);
   }
 
   GPCL_DECL_INLINE static constexpr duration from_secs(u64 secs)
@@ -112,7 +118,6 @@ public:
     GPCL_ASSERT(rhs.nanos_ < 1'000'000'000);
     u64 secs = secs_ + rhs.secs_;
     u32 nanos = nanos_ + rhs.nanos_;
-    ;
     secs += nanos / 1'000'000'000;
     nanos = nanos % 1'000'000'000;
     if (secs < secs_ || secs < rhs.secs_)
@@ -125,8 +130,8 @@ public:
   GPCL_DECL_INLINE constexpr timespec to_timespec() const
   {
     timespec retv{};
-    retv.tv_sec = narrow<time_t>(secs_);
-    retv.tv_nsec = narrow<long>(nanos_);
+    retv.tv_sec = narrow_cast<time_t>(secs_);
+    retv.tv_nsec = narrow_cast<long>(nanos_);
     return retv;
   }
 
