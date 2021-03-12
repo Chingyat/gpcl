@@ -139,6 +139,7 @@ add_executable(tests
         ${GPCL_HEADERS}
         tests/expected_test.cpp
         tests/monotonic_buffer_resource_test.cpp
+		tests/time_test.cpp
         )
 target_link_libraries(tests PRIVATE gpcl::gpcl Catch2::Catch2WithMain)
 

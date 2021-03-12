@@ -53,3 +53,4 @@ CMakeSettings.json
 
 cmake-*
 *~
+/build
