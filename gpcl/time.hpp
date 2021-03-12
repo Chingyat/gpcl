@@ -112,7 +112,7 @@ public:
     return u128(secs_) * 1'000'000'000 + nanos_;
   }
 
-  GPCL_DECL_INLINE constexpr duration checked_add(const duration &rhs) const
+  duration checked_add(const duration &rhs) const
   {
     GPCL_ASSERT(nanos_ < 1'000'000'000);
     GPCL_ASSERT(rhs.nanos_ < 1'000'000'000);
@@ -124,7 +124,7 @@ public:
     {
       GPCL_THROW(std::overflow_error("checked_add"));
     }
-    return {secs, nanos};
+    return duration{secs, nanos};
   }
 
   GPCL_DECL_INLINE constexpr timespec to_timespec() const
