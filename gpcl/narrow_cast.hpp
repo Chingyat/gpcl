@@ -19,7 +19,7 @@
 namespace gpcl {
 
 template <typename To, typename From>
-To narrow_cast(From F) noexcept
+constexpr To narrow_cast(From F) noexcept
 {
   static_assert(std::is_integral<From>() && std::is_integral<To>(),
                 "Both From and To must be integral type");
