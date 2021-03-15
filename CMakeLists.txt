@@ -137,6 +137,7 @@ include(Catch)
 
 add_executable(tests
         ${GPCL_HEADERS}
+		tests/include_src.cpp
         tests/expected_test.cpp
         tests/monotonic_buffer_resource_test.cpp
 		tests/time_test.cpp

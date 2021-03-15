@@ -50,7 +50,7 @@ public:
     std::error_code ec;
     impl_type ::unlink(name, ec);
     if (ec)
-      return gpcl::unexpected(ec);
+      return gpcl::make_unexpected(ec);
     return {};
   }
 
@@ -67,7 +67,7 @@ public:
     std::error_code ec;
     impl_.send(msg, prio, ec);
     if (ec)
-      return gpcl::unexpected(ec);
+      return gpcl::make_unexpected(ec);
     return {};
   }
 
@@ -82,7 +82,7 @@ public:
     std::error_code ec;
     auto len = impl_.receive(msg, ec);
     if (ec)
-      return gpcl::unexpected(ec);
+      return gpcl::make_unexpected(ec);
     return msg.subspan(0, len);
   }
 };

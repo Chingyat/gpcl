@@ -25,6 +25,7 @@
 #include <gpcl/expected_fwd.hpp>
 #include <gpcl/in_place.hpp>
 #include <gpcl/intrusive_list.hpp>
+#include <gpcl/inttypes.hpp>
 #include <gpcl/is_basic_lockable.hpp>
 #include <gpcl/is_lockable.hpp>
 #include <gpcl/message_queue.hpp>
@@ -43,6 +44,7 @@
 #include <gpcl/thread.hpp>
 #include <gpcl/thread_annotations.hpp>
 #include <gpcl/thread_attributes.hpp>
+#include <gpcl/time.hpp>
 #include <gpcl/timer.hpp>
 #include <gpcl/unexpected.hpp>
 #include <gpcl/unique_lock.hpp>
@@ -50,6 +52,4 @@
 #include <gpcl/version.hpp>
 #include <gpcl/zstring.hpp>
 
-
 #endif // GPCL_HPP
-

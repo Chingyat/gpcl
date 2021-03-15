@@ -64,7 +64,7 @@ public:
     std::error_code ec;
     posix_message_queue::unlink(name, ec);
     if (ec)
-      throw std::system_error(ec, __PRETTY_FUNCTION__);
+      GPCL_THROW(std::system_error(ec, __PRETTY_FUNCTION__));
   }
 
   GPCL_DECL void send(gpcl::span<const char> msg, unsigned int prio,
@@ -75,7 +75,7 @@ public:
     std::error_code ec;
     this->send(msg, prio, ec);
     if (ec)
-      throw std::system_error(ec, __PRETTY_FUNCTION__);
+      GPCL_THROW(std::system_error(ec, __PRETTY_FUNCTION__));
   }
 
   GPCL_DECL std::size_t receive(gpcl::span<char> msg, std::error_code &ec);
@@ -85,7 +85,7 @@ public:
     std::error_code ec;
     auto ret = this->receive(msg, ec);
     if (ec)
-      throw std::system_error(ec, __PRETTY_FUNCTION__);
+      GPCL_THROW(std::system_error(ec, __PRETTY_FUNCTION__));
     return ret;
   }
 

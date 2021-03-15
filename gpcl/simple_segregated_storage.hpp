@@ -13,6 +13,7 @@
 
 #include <gpcl/detail/config.hpp>
 #include <gpcl/mutex.hpp>
+#include <atomic>
 #include <cassert>
 #include <memory>
 #include <numeric>
