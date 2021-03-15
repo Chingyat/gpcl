@@ -127,6 +127,56 @@ public:
     return duration{secs, nanos};
   }
 
+  duration saturating_add(const duration &rhs) const noexcept
+  {
+    u32 nanos = nanos_ + rhs.nanos_;
+    u64 carry = nanos / 1'000'000'000;
+    nanos = nanos % 1'000'000'000;
+    u64 secs = carry + secs_ + rhs.secs_;
+    if (secs < secs_ || secs < rhs.secs_)
+    {
+      return max;
+    }
+    else
+    {
+      return {secs, nanos};
+    }
+  }
+
+  duration checked_sub(const duration &rhs) const
+  {
+    if (*this < rhs)
+    {
+      GPCL_THROW(std::overflow_error("checked_sub"));
+    }
+
+    if (nanos_ < rhs.nanos_)
+    {
+      return { secs_ - rhs.secs_ - 1, 1'000'000'000 + nanos_ - rhs.nanos_};
+    }
+    else
+    {
+      return {secs_ - rhs.secs_, nanos_ - rhs.nanos_};
+    }
+  }
+
+  constexpr duration saturating_sub(const duration &rhs) const noexcept
+  {
+    if (*this < rhs)
+    {
+      return zero;
+    }
+
+    if (nanos_ < rhs.nanos_)
+    {
+      return {secs_ - rhs.secs_ - 1, 1'000'000'000 + nanos_ - rhs.nanos_};
+    }
+    else
+    {
+      return {secs_ - rhs.secs_, nanos_ - rhs.nanos_};
+    }
+  }
+
   GPCL_DECL_INLINE constexpr timespec to_timespec() const
   {
     timespec retv{};
@@ -135,12 +185,141 @@ public:
     return retv;
   }
 
+  static GPCL_DECL_INLINE constexpr duration
+  from_timespec(const struct timespec &ts)
+  {
+    return duration{ narrow_cast<u64>(ts.tv_sec), narrow_cast<u32>(ts.tv_nsec) };
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator==(const duration &lhs,
+                                                    const duration &rhs)
+  {
+    return lhs.secs_ == rhs.secs_ && lhs.nanos_ == rhs.nanos_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator!=(const duration &lhs,
+                                                    const duration &rhs)
+  {
+    return lhs.secs_ != rhs.secs_ || lhs.nanos_ != rhs.nanos_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator<(const duration &lhs,
+                                                   const duration &rhs)
+  {
+    return lhs.secs_ < rhs.secs_ ||
+           (lhs.secs_ == rhs.secs_ && lhs.nanos_ < rhs.nanos_);
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator<=(const duration &lhs,
+                                                    const duration &rhs)
+  {
+    return lhs < rhs || lhs == rhs;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator>(const duration &lhs,
+                                                   const duration &rhs)
+  {
+    return rhs < lhs && lhs != rhs;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator>=(const duration &lhs,
+                                                    const duration &rhs)
+  {
+    return rhs < lhs || lhs == rhs;
+  }
+
   static const duration second;
   static const duration millisecond;
   static const duration microsecond;
   static const duration nanosecond;
   static const duration zero;
   static const duration max;
+};
+
+class instant
+{
+  // duration since startup of the system.
+  duration since_startup_;
+
+  explicit instant(const duration &d) : since_startup_(d) {}
+
+public:
+  /// Returns an instant corresponding to "now".
+  static GPCL_DECL_INLINE instant now()
+  {
+#if defined GPCL_POSIX
+    timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts))
+    {
+      detail::throw_system_error("clock_gettime");
+    }
+
+    return instant{duration::from_timespec(ts)};
+
+#elif defined GCPL_WINDOWS
+    GPCL_UNIMPLEMENTED();
+#endif
+  }
+
+  /// Returns the amount of time elapsed from another instant to this one.
+  GPCL_DECL_INLINE constexpr duration
+  duration_since(const instant &earlier) const;
+
+  /// Returns the amount of time elapsed from another instant to this one.
+  GPCL_DECL_INLINE duration checked_duration_since(const instant &earlier) const
+  {
+    return since_startup_.checked_sub(earlier.since_startup_);
+  }
+
+  /// Returns the amount of time elapsed from another instant to this one, or
+  /// zero duration if that instant is later than this one.
+  GPCL_DECL_INLINE constexpr duration
+  saturating_duration_since(const instant &earlier) const
+  {
+    return since_startup_.saturating_sub(earlier.since_startup_);
+  }
+
+  /// Returns the amount of time elapsed since this instant was created.
+  GPCL_DECL_INLINE duration elapsed() const
+  {
+    return now().saturating_duration_since(*this);
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator==(const instant &lhs,
+                                                    const instant &rhs)
+  {
+    return lhs.since_startup_ == rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator!=(const instant &lhs,
+                                                    const instant &rhs)
+  {
+    return lhs.since_startup_ != rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator<(const instant &lhs,
+                                                   const instant &rhs)
+  {
+    return lhs.since_startup_ < rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator>(const instant &lhs,
+                                                   const instant &rhs)
+  {
+    return lhs.since_startup_ > rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator<=(const instant &lhs,
+                                                    const instant &rhs)
+  {
+    return lhs.since_startup_ <= rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator>=(const instant &lhs,
+                                                    const instant &rhs)
+  {
+    return lhs.since_startup_ >= rhs.since_startup_;
+  }
 };
 
 inline const duration duration::second = duration(1, 0);
