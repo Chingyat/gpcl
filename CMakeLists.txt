@@ -52,7 +52,6 @@ set(GPCL_HEADERS
 	gpcl/detail/posix_mutex.hpp
 	gpcl/detail/posix_semaphore.hpp
 	gpcl/detail/posix_thread.hpp
-	gpcl/detail/posix_timer.hpp
 	gpcl/detail/thread_annotations.hpp
 	gpcl/detail/unique_file_descriptor.hpp
 	gpcl/detail/unique_handle.hpp
@@ -87,7 +86,6 @@ set(GPCL_HEADERS
 	gpcl/semaphore.hpp
 	gpcl/thread_annotations.hpp
 	gpcl/thread_attributes.hpp
-	gpcl/timer.hpp
 	gpcl/unique_resource.hpp
 	gpcl/zstring.hpp
 	gpcl/assert.hpp

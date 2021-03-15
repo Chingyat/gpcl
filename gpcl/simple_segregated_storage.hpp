@@ -13,7 +13,6 @@
 
 #include <gpcl/detail/config.hpp>
 #include <gpcl/mutex.hpp>
-#include <atomic>
 #include <cassert>
 #include <memory>
 #include <numeric>
@@ -237,7 +236,7 @@ private:
     return *reinterpret_cast<void **>(chunk);
   }
 
-  std::atomic<void *> free_list_{};
+  void * free_list_{};
 };
 
 } // namespace gpcl
