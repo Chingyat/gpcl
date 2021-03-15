@@ -12,7 +12,6 @@
 #include <gpcl/detail/posix_clock.hpp>
 #include <gpcl/detail/posix_condition_variable.hpp>
 #include <gpcl/detail/posix_mutex.hpp>
-#include <gpcl/detail/posix_timer.hpp>
 #include <type_traits>
 
 #ifdef GPCL_POSIX
