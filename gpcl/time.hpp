@@ -152,7 +152,7 @@ public:
 
     if (nanos_ < rhs.nanos_)
     {
-      return { secs_ - rhs.secs_ - 1, 1'000'000'000 + nanos_ - rhs.nanos_};
+      return {secs_ - rhs.secs_ - 1, 1'000'000'000 + nanos_ - rhs.nanos_};
     }
     else
     {
@@ -188,7 +188,7 @@ public:
   static GPCL_DECL_INLINE constexpr duration
   from_timespec(const struct timespec &ts)
   {
-    return duration{ narrow_cast<u64>(ts.tv_sec), narrow_cast<u32>(ts.tv_nsec) };
+    return duration{narrow_cast<u64>(ts.tv_sec), narrow_cast<u32>(ts.tv_nsec)};
   }
 
   friend GPCL_DECL_INLINE constexpr bool operator==(const duration &lhs,
@@ -322,6 +322,97 @@ public:
   }
 };
 
+class system_time
+{
+  // duration since startup of the system.
+  duration since_startup_;
+
+  explicit system_time(const duration &d) : since_startup_(d) {}
+
+public:
+  system_time() = default;
+
+  /// Returns an system_time corresponding to "now".
+  static GPCL_DECL_INLINE system_time now()
+  {
+#if defined GPCL_POSIX
+    timespec ts;
+    if (clock_gettime(CLOCK_REALTIME, &ts))
+    {
+      detail::throw_system_error("clock_gettime");
+    }
+
+    return system_time{duration::from_timespec(ts)};
+
+#elif defined GCPL_WINDOWS
+    GPCL_UNIMPLEMENTED();
+#endif
+  }
+
+  /// Returns the amount of time elapsed from another system_time to this one.
+  GPCL_DECL_INLINE constexpr duration
+  duration_since(const system_time &earlier) const;
+
+  /// Returns the amount of time elapsed from another system_time to this one.
+  GPCL_DECL_INLINE duration
+  checked_duration_since(const system_time &earlier) const
+  {
+    return since_startup_.checked_sub(earlier.since_startup_);
+  }
+
+  /// Returns the amount of time elapsed from another system_time to this one,
+  /// or zero duration if that system_time is later than this one.
+  GPCL_DECL_INLINE constexpr duration
+  saturating_duration_since(const system_time &earlier) const
+  {
+    return since_startup_.saturating_sub(earlier.since_startup_);
+  }
+
+  /// Returns the amount of time elapsed since this system_time was created.
+  GPCL_DECL_INLINE duration elapsed() const
+  {
+    return now().saturating_duration_since(*this);
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator==(const system_time &lhs,
+                                                    const system_time &rhs)
+  {
+    return lhs.since_startup_ == rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator!=(const system_time &lhs,
+                                                    const system_time &rhs)
+  {
+    return lhs.since_startup_ != rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator<(const system_time &lhs,
+                                                   const system_time &rhs)
+  {
+    return lhs.since_startup_ < rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator>(const system_time &lhs,
+                                                   const system_time &rhs)
+  {
+    return lhs.since_startup_ > rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator<=(const system_time &lhs,
+                                                    const system_time &rhs)
+  {
+    return lhs.since_startup_ <= rhs.since_startup_;
+  }
+
+  friend GPCL_DECL_INLINE constexpr bool operator>=(const system_time &lhs,
+                                                    const system_time &rhs)
+  {
+    return lhs.since_startup_ >= rhs.since_startup_;
+  }
+
+  static const system_time unix_epoch;
+};
+
 inline const duration duration::second = duration(1, 0);
 inline const duration duration::millisecond = duration(0, 1000000);
 inline const duration duration::microsecond = duration(0, 1000);
@@ -330,6 +421,8 @@ inline const duration duration::zero = duration(0, 0);
 
 inline const duration duration::max =
     duration((std::numeric_limits<u64>::max)(), 999'999'999);
+
+inline const system_time system_time::unix_epoch;
 
 } // namespace time
 
