@@ -344,7 +344,7 @@ public:
 
     return system_time{duration::from_timespec(ts)};
 
-#elif defined GCPL_WINDOWS
+#elif defined GPCL_WINDOWS
     GPCL_UNIMPLEMENTED();
 #endif
   }
