@@ -259,7 +259,7 @@ public:
 
   reference back() const
   {
-    GCPL_ASSERT(!empty());
+    GPCL_ASSERT(!empty());
     return *pointer(head_.prev);
   }
 
