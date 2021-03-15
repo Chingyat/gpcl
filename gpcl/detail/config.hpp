@@ -87,8 +87,11 @@
 # endif
 #endif
 
-//#undef GPCL_NO_EXCEPTIONS
-#define GPCL_NO_EXCEPTIONS 1
+#if __cpp_exceptions
+# undef GPCL_NO_EXCEPTIONS
+#else
+# define GPCL_NO_EXCEPTIONS 1
+#endif
 
 /// Main namespace of GPCL
 namespace gpcl {

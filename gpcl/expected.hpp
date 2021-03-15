@@ -67,18 +67,12 @@ class error_formatter<std::exception_ptr>
 public:
   static std::string format(const std::exception_ptr &eptr)
   {
-    try
-    {
-      std::rethrow_exception(eptr);
-    }
-    catch (std::exception &e)
-    {
-      return e.what();
-    }
-    catch (...)
-    {
-      return "unknown exception";
-    }
+    GPCL_TRY { std::rethrow_exception(eptr); }
+#ifndef GPCL_NO_EXCEPTIONS
+    GPCL_CATCH(std::exception & e) { return e.what(); }
+#endif
+    GPCL_CATCH(...) { return "unknown exception"; }
+    GPCL_CATCH_END
   }
 };
 
@@ -137,7 +131,7 @@ public:
   template <
       typename... Args,
       detail::enable_if_t<detail::is_constructible_v<T, Args &&...>, int> = 0>
-  GPCL_DECL_INLINE constexpr explicit expected(in_place_t, Args &&... args)
+  GPCL_DECL_INLINE constexpr explicit expected(in_place_t, Args &&...args)
       : base_type(in_place, detail::forward<Args>(args)...)
   {
   }
@@ -148,7 +142,7 @@ public:
                                 int> = 0>
   GPCL_DECL_INLINE constexpr expected(in_place_t,
                                       std::initializer_list<U> ilist,
-                                      Args &&... args)
+                                      Args &&...args)
       : base_type(in_place, ilist, detail::forward<Args>(args)...)
   {
   }
@@ -310,7 +304,7 @@ public:
   template <
       typename... Args,
       detail::enable_if_t<detail::is_constructible_v<E, Args...>, int> = 0>
-  GPCL_DECL_INLINE constexpr explicit expected(unexpect_t, Args &&... args)
+  GPCL_DECL_INLINE constexpr explicit expected(unexpect_t, Args &&...args)
       : base_type(unexpect, detail::forward<Args>(args)...)
   {
   }
@@ -321,7 +315,7 @@ public:
                                 int> = 0>
   GPCL_DECL_INLINE constexpr explicit expected(unexpect_t,
                                                std::initializer_list<U> &il,
-                                               Args &&... args)
+                                               Args &&...args)
       : base_type(unexpect, il, detail::forward<Args>(args)...)
   {
   }
