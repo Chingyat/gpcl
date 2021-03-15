@@ -15,7 +15,7 @@
 #include <gpcl/narrow_cast.hpp>
 
 #ifdef GPCL_WINDOWS
-#  include <Windows.h>
+#  include <windows.h>
 
 extern "C" {
 WINBASEAPI void __stdcall InitializeConditionVariable(CONDITION_VARIABLE *);
@@ -54,22 +54,17 @@ auto win_condition_variable::wait(unique_lock<win_mutex> &lock) -> void
 
 bool win_condition_variable::wait_until(
     unique_lock<win_mutex> &lock,
-    const chrono::time_point<system_clock> &timeout_time)
+    const system_time &timeout_time)
 {
-  auto rel_time = timeout_time - system_clock::now();
-  if (rel_time.count() < 0)
-  {
-    rel_time = decltype(rel_time)(0);
-  }
-
+  auto rel_time = timeout_time.elapsed();
   return wait_for(lock, rel_time);
 }
 
 bool win_condition_variable::wait_for(unique_lock<win_mutex> &lock,
-                                      const chrono::nanoseconds &rel_time)
+                                      const duration &rel_time)
 {
   GPCL_ASSERT(lock.owns_lock());
-  const auto ms = chrono::duration_cast<chrono::milliseconds>(rel_time).count();
+  const auto ms = rel_time.as_millis();
   if (!::SleepConditionVariableCS(&cv_, lock.mutex().native_handle(),
                                   narrow_cast<DWORD>(ms)))
   {

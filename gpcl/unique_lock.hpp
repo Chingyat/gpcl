@@ -106,17 +106,16 @@ public:
     x.swap(y);
   }
 
-  [[nodiscard]] auto owns_lock() const noexcept -> bool
-  {
-    return owns_lock_;
-  }
+  [[nodiscard]] auto owns_lock() const noexcept -> bool { return owns_lock_; }
 
   [[nodiscard]] mutex_type &mutex() const noexcept { return *mtx_; }
 
   auto release() noexcept -> void
   {
+    GPCL_ASSERT(owns_lock_);
+    GPCL_ASSERT(mtx_);
     owns_lock_ = false;
-    auto ret = mtx_;
+    mtx_ = nullptr;
   }
 
   GPCL_ACQUIRE() void lock()

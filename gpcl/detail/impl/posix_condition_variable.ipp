@@ -42,9 +42,9 @@ void posix_condition_variable::wait(gpcl::unique_lock<posix_normal_mutex> &lock)
 // returns false: no timeout
 // returns true: timeout
 bool posix_condition_variable::wait_until(gpcl::unique_lock<posix_normal_mutex> &lock,
-    const chrono::time_point<realtime_clock> &timeout_time) {
+    const system_time &timeout_time) {
   GPCL_ASSERT(lock.owns_lock());
-  const auto ts = to_timespec(timeout_time.time_since_epoch());
+  const auto ts = timeout_time.duration_since_epoch().to_timespec();
   int err = ::pthread_cond_timedwait(&cond_, lock.mutex().native_handle(), &ts);
 
   if (err == ETIMEDOUT)
@@ -57,8 +57,8 @@ bool posix_condition_variable::wait_until(gpcl::unique_lock<posix_normal_mutex> 
 }
 
 bool posix_condition_variable::wait_for(
-    gpcl::unique_lock<posix_normal_mutex> &lock, const chrono::nanoseconds &rel_time) {
-  return wait_until(lock, realtime_clock::now() + rel_time);
+    gpcl::unique_lock<posix_normal_mutex> &lock, const duration &rel_time) {
+  return wait_until(lock, system_time::now().checked_add(rel_time));
 }
 
 void posix_condition_variable::notify_one() {

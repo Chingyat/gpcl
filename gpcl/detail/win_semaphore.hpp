@@ -17,7 +17,7 @@
 
 #ifdef GPCL_WINDOWS
 
-#include <Windows.h>
+#include <windows.h>
 
 namespace gpcl {
 namespace detail {

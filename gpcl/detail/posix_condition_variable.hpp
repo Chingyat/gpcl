@@ -11,7 +11,7 @@
 #ifndef GPCL_DETAIL_POSIX_CONDITION_VARIABLE_HPP
 #define GPCL_DETAIL_POSIX_CONDITION_VARIABLE_HPP
 
-#include <gpcl/detail/chrono.hpp>
+#include <gpcl/time.hpp>
 #include <gpcl/detail/config.hpp>
 #include <gpcl/detail/posix_clock.hpp>
 #include <gpcl/detail/posix_mutex.hpp>
@@ -33,10 +33,10 @@ public:
   GPCL_DECL void wait(gpcl::unique_lock<posix_normal_mutex> &lock);
 
   GPCL_DECL bool wait_until(gpcl::unique_lock<posix_normal_mutex> &lock,
-      const chrono::time_point<realtime_clock> &timeout_time);
+      const system_time &timeout_time);
 
   GPCL_DECL bool wait_for(
-      gpcl::unique_lock<posix_normal_mutex> &lock, const chrono::nanoseconds &rel_time);
+      gpcl::unique_lock<posix_normal_mutex> &lock, const duration &rel_time);
 
   GPCL_DECL void notify_one();
 

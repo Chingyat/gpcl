@@ -66,42 +66,33 @@ public:
   }
 
   template <typename Clock, typename Duration>
-  cv_status
-  wait_until(unique_lock<mutex> &lock,
-             chrono::time_point<Clock, Duration> const &timeout_time,
-             typename std::enable_if<std::is_same<Clock, system_clock>::value,
-                                     int>::type = 0)
+  cv_status wait_until(unique_lock<mutex> &lock,
+                       system_time const &timeout_time)
   {
     unique_lock_adaptor lock_adaptor(lock);
     return static_cast<cv_status>(
         impl_.wait_until(lock_adaptor.get_impl_lock(), timeout_time));
   }
 
-  template <typename Clock, typename Duration>
-  cv_status
-  wait_until(unique_lock<mutex> &lock,
-             chrono::time_point<Clock, Duration> const &timeout_time,
-             typename std::enable_if<!std::is_same<Clock, system_clock>::value,
-                                     int>::type = 0)
+  cv_status wait_until(unique_lock<mutex> &lock,
+                       system_time const &timeout_time)
   {
     unique_lock_adaptor lock_adaptor(lock);
     return static_cast<cv_status>(impl_.wait_for(lock_adaptor.get_impl_lock(),
-                                                 timeout_time - Clock::now()));
+                                                 timeout_time.elapsed()));
   }
 
-  template <typename Rep, typename Period>
   cv_status wait_for(unique_lock<mutex> &lock,
-                     const chrono::duration<Rep, Period> &rel_time)
+                     const duration &rel_time)
   {
     unique_lock_adaptor lock_adaptor(lock);
     return static_cast<cv_status>(
         impl_.wait_for(lock_adaptor.get_impl_lock(),
-                       chrono::duration_cast<chrono::nanoseconds>(rel_time)));
+                       rel_time));
   }
 
-  template <typename Clock, typename Duration, typename Predicate>
-  bool wait_until(unique_lock<mutex> &lock,
-                  chrono::time_point<Clock, Duration> &timeout_time,
+  template <typename Predicate>
+  bool wait_until(unique_lock<mutex> &lock, const system_time &timeout_time,
                   Predicate pred)
   {
     while (!pred())
@@ -113,9 +104,9 @@ public:
     return true;
   }
 
-  template <typename Rep, typename Period, typename Predicate>
-  bool wait_for(unique_lock<mutex> &lock,
-                chrono::duration<Rep, Period> const &rel_time, Predicate pred)
+  template <typename Predicate>
+  bool wait_for(unique_lock<mutex> &lock, duration const &rel_time,
+                Predicate pred)
   {
     while (!pred())
     {

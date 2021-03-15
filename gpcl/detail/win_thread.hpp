@@ -18,7 +18,7 @@
 #include <type_traits>
 
 #ifdef GPCL_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #include <process.h>
 
 namespace gpcl {

@@ -335,9 +335,9 @@ public:
 class system_time
 {
   // duration since startup of the system.
-  duration since_startup_;
+  duration since_epoch_;
 
-  explicit system_time(const duration &d) : since_startup_(d) {}
+  explicit system_time(const duration &d) : since_epoch_(d) {}
 
 public:
   system_time() = default;
@@ -364,18 +364,25 @@ public:
   duration_since(const system_time &earlier) const;
 
   /// Returns the amount of time elapsed from another system_time to this one.
-  GPCL_DECL_INLINE duration
-  checked_duration_since(const system_time &earlier) const
+  GPCL_DECL_INLINE duration checked_sub(const system_time &earlier) const
   {
-    return since_startup_.checked_sub(earlier.since_startup_);
+    return since_epoch_.checked_sub(earlier.since_epoch_);
   }
 
-  /// Returns the amount of time elapsed from another system_time to this one,
-  /// or zero duration if that system_time is later than this one.
   GPCL_DECL_INLINE constexpr duration
   saturating_duration_since(const system_time &earlier) const
   {
-    return since_startup_.saturating_sub(earlier.since_startup_);
+    return since_epoch_.saturating_sub(earlier.since_epoch_);
+  }
+
+  GPCL_DECL_INLINE system_time checked_add(const duration &dur) const
+  {
+    return system_time{since_epoch_.checked_add(dur)};
+  }
+
+  GPCL_DECL_INLINE system_time checked_sub(const duration &dur) const
+  {
+    return system_time{since_epoch_.checked_sub(dur)};
   }
 
   /// Returns the amount of time elapsed since this system_time was created.
@@ -384,40 +391,45 @@ public:
     return now().saturating_duration_since(*this);
   }
 
+  GPCL_DECL_INLINE constexpr duration duration_since_epoch() const
+  {
+    return since_epoch_;
+  }
+
   friend GPCL_DECL_INLINE constexpr bool operator==(const system_time &lhs,
                                                     const system_time &rhs)
   {
-    return lhs.since_startup_ == rhs.since_startup_;
+    return lhs.since_epoch_ == rhs.since_epoch_;
   }
 
   friend GPCL_DECL_INLINE constexpr bool operator!=(const system_time &lhs,
                                                     const system_time &rhs)
   {
-    return lhs.since_startup_ != rhs.since_startup_;
+    return lhs.since_epoch_ != rhs.since_epoch_;
   }
 
   friend GPCL_DECL_INLINE constexpr bool operator<(const system_time &lhs,
                                                    const system_time &rhs)
   {
-    return lhs.since_startup_ < rhs.since_startup_;
+    return lhs.since_epoch_ < rhs.since_epoch_;
   }
 
   friend GPCL_DECL_INLINE constexpr bool operator>(const system_time &lhs,
                                                    const system_time &rhs)
   {
-    return lhs.since_startup_ > rhs.since_startup_;
+    return lhs.since_epoch_ > rhs.since_epoch_;
   }
 
   friend GPCL_DECL_INLINE constexpr bool operator<=(const system_time &lhs,
                                                     const system_time &rhs)
   {
-    return lhs.since_startup_ <= rhs.since_startup_;
+    return lhs.since_epoch_ <= rhs.since_epoch_;
   }
 
   friend GPCL_DECL_INLINE constexpr bool operator>=(const system_time &lhs,
                                                     const system_time &rhs)
   {
-    return lhs.since_startup_ >= rhs.since_startup_;
+    return lhs.since_epoch_ >= rhs.since_epoch_;
   }
 
   static const system_time unix_epoch;

@@ -33,7 +33,7 @@
 #endif
 
 #if defined(GPCL_WINDOWS)
-#include <Windows.h>
+#include <windows.h>
 #elif defined(GPCL_POSIX)
 #include <cerrno>
 #endif

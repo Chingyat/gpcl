@@ -12,7 +12,7 @@
 #include <gpcl/detail/win_clock.hpp>
 
 #ifdef GPCL_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 
 namespace gpcl {
 namespace detail {
