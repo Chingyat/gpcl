@@ -115,7 +115,7 @@ set(GPCL_HEADERS
 	gpcl/simple_segregated_storage.hpp
 	gpcl/version.hpp
 	gpcl/unexpected.hpp
-)
+    )
 
 
 add_library(gpcl INTERFACE)
@@ -139,8 +139,9 @@ add_executable(tests
         tests/expected_test.cpp
         tests/monotonic_buffer_resource_test.cpp
 		tests/time_test.cpp
-        )
-target_link_libraries(tests PRIVATE gpcl::gpcl Catch2::Catch2WithMain)
+		tests/file_test.cpp
+		)
+target_link_libraries(tests PRIVATE gpcl::gpcl Catch2::Catch2WithMain expat)
 
 catch_discover_tests(tests)
 

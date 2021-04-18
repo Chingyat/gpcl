@@ -54,4 +54,6 @@
 /// Indicates that the function is not implemented yet
 #define GPCL_UNIMPLEMENTED() GPCL_UNREACHABLE("unimplemented")
 
+#define GPCL_FATAL(errno) GPCL_UNREACHABLE(std::strerror(errno))
+
 #endif
