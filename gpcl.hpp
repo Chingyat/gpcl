@@ -28,6 +28,7 @@
 #include <gpcl/inttypes.hpp>
 #include <gpcl/is_basic_lockable.hpp>
 #include <gpcl/is_lockable.hpp>
+#include <gpcl/lock_file.hpp>
 #include <gpcl/message_queue.hpp>
 #include <gpcl/mutex.hpp>
 #include <gpcl/narrow_cast.hpp>

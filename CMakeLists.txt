@@ -140,8 +140,9 @@ add_executable(tests
         tests/monotonic_buffer_resource_test.cpp
 		tests/time_test.cpp
 		tests/file_test.cpp
-		)
-target_link_libraries(tests PRIVATE gpcl::gpcl Catch2::Catch2WithMain expat)
+        tests/lock_file_test.cpp
+        )
+target_link_libraries(tests PRIVATE gpcl::gpcl Catch2::Catch2WithMain)
 
 catch_discover_tests(tests)
 

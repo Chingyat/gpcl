@@ -13,6 +13,7 @@
 
 #include <gpcl/pmr/memory_resource.hpp>
 #include <gpcl/pmr/new_delete_resource.hpp>
+#include <new>
 
 namespace gpcl {
 namespace pmr {
@@ -27,6 +28,7 @@ class new_delete_resource_impl : public memory_resource
   }
   void do_deallocate(void *p, std::size_t bytes, std::size_t alignment) override
   {
+    (void)bytes;
     ::operator delete[](p, std::align_val_t(alignment));
   }
   bool do_is_equal(const memory_resource &other) const noexcept override

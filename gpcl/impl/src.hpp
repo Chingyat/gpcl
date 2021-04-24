@@ -35,4 +35,5 @@
 #include <gpcl/detail/impl/win_mutex.ipp>
 #include <gpcl/detail/impl/win_semaphore.ipp>
 #include <gpcl/detail/impl/win_thread.ipp>
+#include <gpcl/detail/impl/win_lock_file.ipp>
 #endif
