@@ -42,79 +42,103 @@ find_package(
 enable_testing()
 
 set(GPCL_HEADERS
+	gpcl/buffer.hpp
+	gpcl/buffer_sequence.hpp
 	gpcl/clock.hpp
+	gpcl/clone_ptr.hpp
 	gpcl/creation_tag.hpp
+	gpcl/decay_copy.hpp
 	gpcl/detail/chrono.hpp
-	gpcl/detail/error.hpp
+	gpcl/detail/expected.hpp
+	gpcl/detail/impl/error.ipp
+	gpcl/detail/impl/posix_clock.ipp
+	gpcl/detail/impl/posix_message_queue.ipp
+	gpcl/detail/impl/posix_mutex.ipp
+	gpcl/detail/impl/posix_semaphore.ipp
+	gpcl/detail/impl/posix_thread.ipp
+	gpcl/detail/impl/unique_file_descriptor.ipp
+	gpcl/detail/impl/unique_handle.ipp
+	gpcl/detail/impl/unreachable.ipp
+	gpcl/detail/impl/win_semaphore.ipp
+	gpcl/detail/impl/win_thread.ipp
+	gpcl/detail/impl/posix_condition_variable.ipp
+	gpcl/detail/impl/win_clock.ipp
+	gpcl/detail/impl/win_condition_variable.ipp
+	gpcl/detail/impl/win_mutex.ipp
+	gpcl/detail/impl/win_lock_file.ipp
+	gpcl/detail/impl/posix_lock_file.ipp
+	gpcl/detail/impl/posix_file.ipp
 	gpcl/detail/optional.hpp
 	gpcl/detail/posix_clock.hpp
-	gpcl/detail/posix_message_queue.hpp
 	gpcl/detail/posix_mutex.hpp
 	gpcl/detail/posix_semaphore.hpp
 	gpcl/detail/posix_thread.hpp
 	gpcl/detail/thread_annotations.hpp
+	gpcl/detail/type_traits.hpp
 	gpcl/detail/unique_file_descriptor.hpp
-	gpcl/detail/unique_handle.hpp
+	gpcl/detail/unreachable.hpp
+	gpcl/detail/utility.hpp
 	gpcl/detail/win_clock.hpp
+	gpcl/detail/config.hpp
+	gpcl/detail/error.hpp
+	gpcl/detail/posix_condition_variable.hpp
+	gpcl/detail/posix_message_queue.hpp
+	gpcl/detail/unique_handle.hpp
+	gpcl/detail/win_condition_variable.hpp
 	gpcl/detail/win_mutex.hpp
 	gpcl/detail/win_semaphore.hpp
 	gpcl/detail/win_thread.hpp
-	gpcl/detail/expected.hpp
-	gpcl/detail/posix_condition_variable.hpp
-	gpcl/detail/type_traits.hpp
-	gpcl/detail/unreachable.hpp
-	gpcl/detail/utility.hpp
-	gpcl/detail/win_condition_variable.hpp
-	gpcl/detail/config.hpp
+	gpcl/detail/win_lock_file.hpp
+	gpcl/detail/posix_lock_file.hpp
+	gpcl/detail/posix_file.hpp
 	gpcl/error.hpp
 	gpcl/event.hpp
-	gpcl/ext.hpp
-	gpcl/ext/detail/config.hpp
-	gpcl/ext/mqtt.hpp
-	gpcl/ext/sqlite.hpp
-	gpcl/impl/ext-src.hpp
+	gpcl/expected_fwd.hpp
 	gpcl/impl/offset_ptr.hpp
-	gpcl/impl/src.hpp
 	gpcl/impl/expected.hpp
+	gpcl/impl/src.hpp
+	gpcl/in_place.hpp
 	gpcl/is_basic_lockable.hpp
 	gpcl/is_lockable.hpp
-	gpcl/message_queue.hpp
-	gpcl/narrow_cast.hpp
+	gpcl/mutex.hpp
 	gpcl/noncopyable.hpp
+	gpcl/object_pool.hpp
 	gpcl/offset_ptr.hpp
 	gpcl/optional_fwd.hpp
+	gpcl/pmr/default_resource.hpp
+	gpcl/pmr/impl/default_resource.ipp
+	gpcl/pmr/impl/monotonic_buffer_resource.ipp
+	gpcl/pmr/impl/null_memory_resource.ipp
+	gpcl/pmr/impl/new_delete_resource.ipp
+	gpcl/pmr/memory_resource.hpp
+	gpcl/pmr/monotonic_buffer_resource.hpp
+	gpcl/pmr/new_delete_resource.hpp
+	gpcl/pmr/null_memory_resource.hpp
+	gpcl/pmr/polymorphic_allocator.hpp
+	gpcl/pool_allocator.hpp
 	gpcl/semaphore.hpp
+	gpcl/span.hpp
+	gpcl/thread.hpp
 	gpcl/thread_annotations.hpp
 	gpcl/thread_attributes.hpp
+	gpcl/unexpected.hpp
 	gpcl/unique_resource.hpp
+	gpcl/version.hpp
 	gpcl/zstring.hpp
 	gpcl/assert.hpp
 	gpcl/condition_variable.hpp
-	gpcl/mutex.hpp
-	gpcl/object_pool.hpp
+	gpcl/expected.hpp
+	gpcl/inttypes.hpp
+	gpcl/message_queue.hpp
+	gpcl/narrow_cast.hpp
 	gpcl/optional.hpp
 	gpcl/pool.hpp
-	gpcl/span.hpp
-	gpcl/thread.hpp
-	gpcl/unique_lock.hpp
-	gpcl/buffer.hpp
-	gpcl/expected.hpp
-	gpcl/clone_ptr.hpp
-	gpcl/pmr/memory_resource.hpp
-	gpcl/pmr/default_resource.hpp
-	gpcl/pmr/null_memory_resource.hpp
-	gpcl/pmr/new_delete_resource.hpp
-	gpcl/pmr/monotonic_buffer_resource.hpp
-	gpcl/pmr/polymorphic_allocator.hpp
-	gpcl/in_place.hpp
-	gpcl/decay_copy.hpp
-	gpcl/buffer_sequence.hpp
-	gpcl/intrusive_list.hpp
-	gpcl/pool_allocator.hpp
-	gpcl/expected_fwd.hpp
 	gpcl/simple_segregated_storage.hpp
-	gpcl/version.hpp
-	gpcl/unexpected.hpp
+	gpcl/time.hpp
+	gpcl/unique_lock.hpp
+	gpcl/lock_file.hpp
+	gpcl/file.hpp
+	gpcl/intrusive_list.hpp
     )
 
 
