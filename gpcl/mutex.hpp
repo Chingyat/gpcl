@@ -42,7 +42,7 @@ public:
 
   GPCL_TRY_ACQUIRE(true) auto try_lock() -> bool
   {
-#ifndef NDEBUG
+#ifndef GPCL_DEBUG
     return !std::exchange(locked_, true);
 #else
     return true;
@@ -51,7 +51,7 @@ public:
   auto native_handle() noexcept -> std::nullptr_t { return nullptr; }
 
 private:
-#ifndef NDEBUG
+#ifndef GPCL_DEBUG
   bool locked_{};
 #endif
 };
