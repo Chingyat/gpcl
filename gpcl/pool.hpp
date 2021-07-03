@@ -25,7 +25,7 @@ struct is_user_allocator : std::false_type
 
 template <typename T>
 struct is_user_allocator<
-    T, std::void_t<decltype(T::malloc(0)), decltype(T::free((char *)0)),
+    T, detail::void_t<decltype(T::malloc(0)), decltype(T::free((char *)0)),
                    typename T::size_type, typename T::difference_type>>
     : std::true_type
 {
