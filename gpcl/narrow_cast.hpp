@@ -21,8 +21,8 @@ namespace gpcl {
 template <typename To, typename From>
 constexpr To narrow_cast(From F) noexcept
 {
-  static_assert(std::is_integral<From>() && std::is_integral<To>(),
-                "Both From and To must be integral type");
+  static_assert(std::is_arithmetic<From>() && std::is_arithmetic<To>(),
+                "Both From and To must be arithmetic type");
 
   To T = static_cast<To>(F);
   GPCL_ASSERT(static_cast<From>(T) == F);
@@ -41,8 +41,8 @@ public:
 template <typename To, typename From>
 To narrow(From F) noexcept
 {
-  static_assert(std::is_integral<From>() && std::is_integral<To>(),
-                "Both From and To must be integral type");
+  static_assert(std::is_arithmetic<From>() && std::is_arithmetic<To>(),
+                "Both From and To must be arithmetic type");
 
   To T = static_cast<To>(F);
   if (static_cast<From>(T) != F)
