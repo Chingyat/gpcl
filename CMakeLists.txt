@@ -120,10 +120,20 @@ set(GPCL_HEADERS
 
 add_library(gpcl INTERFACE)
 add_library(gpcl::gpcl ALIAS gpcl)
-target_include_directories(gpcl INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(gpcl 
+	INTERFACE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+	)
+if (UNIX)
+	target_link_libraries(gpcl
+		INTERFACE
+		pthread
+		)
+endif ()
 
-install(DIRECTORY include/gpcl DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(FILES include/gpcl.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY gpcl DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES gpcl.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 set(CATCH_BUILD_TESTING OFF)
 add_subdirectory(vendor/Catch2)

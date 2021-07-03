@@ -107,6 +107,8 @@ public:
     return ret;
   }
 
+  bool is_open() const { return fd_ != -1; }
+
 private:
   native_handle_type fd_{-1};
 };
@@ -117,7 +119,7 @@ GPCL_DECL_INLINE void swap(posix_file &x, posix_file &y) noexcept { x.swap(y); }
 } // namespace gpcl
 
 #ifdef GPCL_HEADER_ONLY
-#include <gpcl/detail/impl/posix_file.ipp>
+#  include <gpcl/detail/impl/posix_file.ipp>
 #endif // GPCL_HEADER_ONLY
 
 #endif // GPCL_DETAIL_POSIX_FILE_HPP
