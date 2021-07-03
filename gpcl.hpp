@@ -23,6 +23,7 @@
 #include <gpcl/event.hpp>
 #include <gpcl/expected.hpp>
 #include <gpcl/expected_fwd.hpp>
+#include <gpcl/file.hpp>
 #include <gpcl/in_place.hpp>
 #include <gpcl/intrusive_list.hpp>
 #include <gpcl/inttypes.hpp>
