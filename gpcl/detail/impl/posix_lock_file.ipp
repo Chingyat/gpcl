@@ -1,3 +1,13 @@
+//
+// posix_lock_file.ipp
+// ~~~~~~~~~~~~~~~~~~~
+//
+// Copyright (c) 2021 Zhengyi Fu (tsingyat at outlook dot com)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #include <gpcl/detail/posix_lock_file.hpp>
 #include <gpcl/unique_lock.hpp>
 #include <fcntl.h>
