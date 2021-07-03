@@ -30,13 +30,13 @@ public:
 
   ~win_lock_file()
   {
-    if (is_locked())
+    if (owns_lock())
     {
       unlock();
     }
   }
 
-  bool is_locked() const { return handle_ != INVALID_HANDLE_VALUE; }
+  bool owns_lock() const { return handle_ != INVALID_HANDLE_VALUE; }
 
   GPCL_DECL void lock();
 
