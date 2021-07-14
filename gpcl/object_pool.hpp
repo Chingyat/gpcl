@@ -11,6 +11,7 @@
 #ifndef GPCL_OBJECT_POOL_HPP
 #define GPCL_OBJECT_POOL_HPP
 
+#include <gpcl/detail/compressed_pair.hpp>
 #include <gpcl/detail/config.hpp>
 #include <gpcl/mutex.hpp>
 #include <gpcl/pool.hpp>
@@ -36,7 +37,12 @@ public:
   using size_type = typename user_allocator::size_type;
   using difference_type = typename user_allocator::difference_type;
 
-  object_pool() : pool_(sizeof(chunk_info)), obj_list_() {}
+  object_pool()
+      : p_(detail::piecewise_construct, std::make_tuple(sizeof(chunk_info)),
+           std::make_tuple()),
+        obj_list_()
+  {
+  }
 
   ~object_pool()
   {
@@ -49,9 +55,9 @@ public:
 
   element_type *malloc()
   {
-    gpcl::unique_lock<mutex_type> lock(mutex_);
+    gpcl::unique_lock<mutex_type> lock(p_.second());
 
-    auto *obj = reinterpret_cast<chunk_info *>(pool_.malloc());
+    auto *obj = reinterpret_cast<chunk_info *>(p_.first().malloc());
     obj->prev = nullptr;
     obj->next = obj_list_;
     if (obj_list_)
@@ -64,7 +70,7 @@ public:
   {
     GPCL_ASSERT(p != nullptr);
     auto *obj = reinterpret_cast<chunk_info *>(p);
-    gpcl::unique_lock<mutex_type> lock(mutex_);
+    gpcl::unique_lock<mutex_type> lock(p_.second());
 
     auto prev = obj->prev;
     auto next = obj->next;
@@ -72,34 +78,36 @@ public:
       prev->next = next;
     if (next)
       next->prev = prev;
-    pool_.free(p);
+    p_.first().free(p);
     if (obj_list_ == obj)
       obj_list_ = next;
   }
 
   bool is_from(element_type *p) { GPCL_UNIMPLEMENTED(); }
 
-  element_type *construct() { return new (malloc()) element_type(); }
+  element_type *construct() { return new (this->malloc()) element_type(); }
 
   template <typename... Args>
-  element_type *construct(Args &&... args)
+  element_type *construct(Args &&...args)
   {
-    return new (malloc()) element_type(std::forward<Args>(args)...);
+    return new (this->malloc()) element_type(std::forward<Args>(args)...);
   }
 
   void destroy(element_type *p)
   {
     p->~element_type();
-    free(p);
+    this->free(p);
   }
 
-  size_type get_next_size() const { pool_.get_next_size(); }
+  size_type get_next_size() const { p_.first().get_next_size(); }
 
-  void set_next_size(size_type next_size) { pool_.set_next_size(next_size); }
+  void set_next_size(size_type next_size)
+  {
+    p_.first().set_next_size(next_size);
+  }
 
 private:
-  pool<user_allocator, null_mutex> pool_;
-  mutex_type mutex_;
+  detail::compressed_pair<pool<user_allocator, null_mutex>, mutex_type> p_;
   chunk_info *obj_list_;
 };
 

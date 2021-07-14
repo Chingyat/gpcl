@@ -11,9 +11,9 @@
 #ifndef GPCL_UNIQUE_RESOURCE
 #define GPCL_UNIQUE_RESOURCE
 
+#include <gpcl/detail/compressed_pair.hpp>
 #include <gpcl/detail/config.hpp>
 #include <gpcl/detail/type_traits.hpp>
-#include <gpcl/detail/compressed_pair.hpp>
 #include <gpcl/optional.hpp>
 
 namespace gpcl {
@@ -42,12 +42,11 @@ class unique_resource : public unique_resource_base<R, D>
 private:
   using base_type = unique_resource_base<R, D>;
 
-  detail::compressed_pair<
-    typename base_type::stored_resource_handle_type,
-    typename base_type::deleter_type> p_;
+  detail::compressed_pair<typename base_type::stored_resource_handle_type,
+                          typename base_type::deleter_type>
+      p_;
 
   bool owns_resource_{};
-
 
 public:
   unique_resource() = default;
