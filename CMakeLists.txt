@@ -175,6 +175,7 @@ add_executable(tests
 		tests/time_test.cpp
 		tests/file_test.cpp
         tests/lock_file_test.cpp
+		tests/unique_resource_test.cpp
         )
 target_link_libraries(tests PRIVATE gpcl::gpcl Catch2::Catch2WithMain)
 

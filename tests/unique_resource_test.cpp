@@ -3,13 +3,35 @@
 #include <unistd.h>
 #include <functional>
 
-TEST_CASE("unique_resource") {
-  int fd = ::dup(1);
+struct my_deleter
+{
+  int resource;
+  bool &invoked;
+
+  void operator()(int r)
   {
-    gpcl::unique_resource<int, std::function<void (int)>> resource(fd, &::close);
+    REQUIRE(!invoked);
+    REQUIRE(r == resource);
+    invoked = true;
+  }
+};
+
+TEST_CASE("unique_resource") {
+  int r = 100;
+  bool invoked = false;
+  {
+    gpcl::unique_resource<int, std::function<void (int)>> resource(r, my_deleter{r, invoked});
 
     gpcl::unique_resource<int, std::function<void (int)>> resource2(std::move(resource));
   }
 
-  REQUIRE(::close(fd) != 0);
+  REQUIRE(invoked);
+
+  invoked = false;
+  {
+    gpcl::unique_resource<int, my_deleter> resource(r, my_deleter{r, invoked});
+
+    gpcl::unique_resource<int, my_deleter> resource2(std::move(resource));
+  }
+  REQUIRE(invoked);
 }
