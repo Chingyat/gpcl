@@ -67,12 +67,12 @@ class error_formatter<std::exception_ptr>
 public:
   static std::string format(const std::exception_ptr &eptr)
   {
-    GPCL_TRY { std::rethrow_exception(eptr); }
 #ifndef GPCL_NO_EXCEPTIONS
+    GPCL_TRY { if (eptr) std::rethrow_exception(eptr); }
     GPCL_CATCH(std::exception & e) { return e.what(); }
-#endif
-    GPCL_CATCH(...) { return "unknown exception"; }
     GPCL_CATCH_END
+#endif
+    return "unknown exception";
   }
 };
 
