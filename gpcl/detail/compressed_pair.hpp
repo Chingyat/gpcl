@@ -18,11 +18,11 @@
 namespace gpcl {
 namespace detail {
 
-template <typename T, typename Tag, bool IsClass = std::is_class<T>::value>
-class compressed_pair_base;
+template <typename T, typename Tag, bool IsEmpty = std::is_empty<T>::value>
+class compressed_storage;
 
 template <typename T, typename Tag>
-class compressed_pair_base<T, Tag, false>
+class compressed_storage<T, Tag, false>
 {
   T data_;
 
@@ -30,7 +30,7 @@ public:
   using type = T;
 
   template <typename... Args>
-  constexpr compressed_pair_base(Args &&...args)
+  constexpr compressed_storage(Args &&...args)
       : data_(std::forward<Args>(args)...)
   {
   }
@@ -43,14 +43,13 @@ public:
 };
 
 template <typename T, typename Tag>
-class compressed_pair_base<T, Tag, true> : private T
+class compressed_storage<T, Tag, true> : private T
 {
 public:
   using type = T;
 
   template <typename... Args>
-  constexpr compressed_pair_base(Args &&...args)
-      : T(std::forward<Args>(args)...)
+  constexpr compressed_storage(Args &&...args) : T(std::forward<Args>(args)...)
   {
   }
 
@@ -61,12 +60,17 @@ public:
   T const &&get() const && { return *this; }
 };
 
-template <typename T1, typename T2>
-class compressed_pair : private compressed_pair_base<T1, class tag1>,
-                        private compressed_pair_base<T2, class tag2>
+enum piecewise_construct_t
 {
-  using base_type_1 = compressed_pair_base<T1, tag1>;
-  using base_type_2 = compressed_pair_base<T2, tag2>;
+  piecewise_construct
+};
+
+template <typename T1, typename T2>
+class compressed_pair : private compressed_storage<T1, class tag1>,
+                        private compressed_storage<T2, class tag2>
+{
+  using base_type_1 = compressed_storage<T1, tag1>;
+  using base_type_2 = compressed_storage<T2, tag2>;
 
   template <typename Tuple1, typename Tuple2, std::size_t... Is,
             std::size_t... Js>
@@ -82,10 +86,7 @@ public:
   using first_type = T1;
   using second_type = T2;
 
-  enum piecewise_construct_t
-  {
-    piecewise_construct
-  };
+  explicit constexpr compressed_pair() = default;
 
   template <typename U1, typename U2>
   constexpr compressed_pair(U1 &&x, U2 &&y)
@@ -94,13 +95,12 @@ public:
   {
   }
 
-  template <typename Tuple1, typename Tuple2>
-  constexpr compressed_pair(piecewise_construct_t, Tuple1 &&tp1, Tuple2 &&tp2)
-      : compressed_pair(std::forward<Tuple1>(tp1), std::forward<Tuple2>(tp2),
-                        std::make_index_sequence<
-                            std::tuple_size<std::decay_t<Tuple1>>::value>(),
-                        std::make_index_sequence<
-                            std::tuple_size<std::decay_t<Tuple2>>::value>())
+  template <typename... Xs, typename... Ys>
+  constexpr compressed_pair(piecewise_construct_t, std::tuple<Xs...> tp1,
+                            std::tuple<Ys...> tp2)
+      : compressed_pair(std::move(tp1), std::move(tp2),
+                        std::index_sequence_for<Xs...>(),
+                        std::index_sequence_for<Ys...>())
   {
   }
 
