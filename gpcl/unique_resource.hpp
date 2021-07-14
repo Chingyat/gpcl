@@ -13,6 +13,7 @@
 
 #include <gpcl/detail/config.hpp>
 #include <gpcl/detail/type_traits.hpp>
+#include <gpcl/detail/compressed_pair.hpp>
 #include <gpcl/optional.hpp>
 
 namespace gpcl {
@@ -41,9 +42,12 @@ class unique_resource : public unique_resource_base<R, D>
 private:
   using base_type = unique_resource_base<R, D>;
 
-  typename base_type::stored_resource_handle_type r_{};
-  typename base_type::deleter_type d_{};
+  detail::compressed_pair<
+    typename base_type::stored_resource_handle_type,
+    typename base_type::deleter_type> p_;
+
   bool owns_resource_{};
+
 
 public:
   unique_resource() = default;
@@ -52,15 +56,13 @@ public:
   unique_resource(RR &&r, DD &&d) noexcept(
       std::is_nothrow_constructible_v<std::decay_t<R>, R>
           &&std::is_nothrow_constructible_v<std::decay_t<D>, D>)
-      : r_(std::forward<RR>(r)),
-        d_(std::forward<DD>(d)),
+      : p_(std::forward<RR>(r), std::forward<DD>(d)),
         owns_resource_(true)
   {
   }
 
   unique_resource(unique_resource &&other)
-      : r_(std::move(other).r_),
-        d_(std::move(other).d_),
+      : p_(std::move(other).p_),
         owns_resource_(detail::exchange(other.owns_resource_, false))
   {
   }
@@ -79,7 +81,7 @@ public:
   {
     if (owns_resource_)
     {
-      d_(r_);
+      p_.second()(p_.first());
       owns_resource_ = false;
     }
   }
@@ -87,19 +89,16 @@ public:
   template <typename RR>
   void reset(RR &&r)
   {
-    if (owns_resource_)
-    {
-      d_(r_);
-      r_ = std::forward<RR>(r);
-    }
+    reset();
+    p_.second() = std::forward<RR>(r);
   }
 
   /// Accesses the underlying resource handle.
-  const R &get() const noexcept { return r_; }
+  const R &get() const noexcept { return p_.first(); }
 
   /// Accesses the deleter object which would be used for disposing the managed
   /// resource.
-  const D &get_deleter() const noexcept { return d_; }
+  const D &get_deleter() const noexcept { return p_.second(); }
 
   /// Access the object or function pointed by the underlying resource handle
   /// which is a pointer. This function participates in overload resolution only
@@ -109,13 +108,13 @@ public:
   std::add_lvalue_reference_t<std::remove_pointer_t<R>>
   operator*() const noexcept
   {
-    return *r_;
+    return *p_.first();
   }
 
   /// Get a copy of the underlying resource handle which is a pointer. This
   /// function participates in overload resolution only if std::is_pointer_v<R>
   /// is true. The return value is typically used to access the pointed object.
-  R operator->() const noexcept { return r_; }
+  R operator->() const noexcept { return *p_.first(); }
 };
 
 /// Creates a unique_resource, initializes its stored resource handle is
