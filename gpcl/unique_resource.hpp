@@ -12,7 +12,129 @@
 #define GPCL_UNIQUE_RESOURCE
 
 #include <gpcl/detail/config.hpp>
+#include <gpcl/detail/type_traits.hpp>
+#include <gpcl/optional.hpp>
 
-namespace gpcl {} // namespace gpcl
+namespace gpcl {
+
+template <typename R, typename D>
+class unique_resource_base
+{
+public:
+  using stored_resource_handle_type = R;
+  using underlying_resource_handle_type = R;
+  using deleter_type = D;
+};
+
+template <typename R, typename D>
+class unique_resource_base<R &, D>
+{
+public:
+  using stored_resource_handle_type = std::reference_wrapper<R>;
+  using underlying_resource_handle_type = R &;
+  using deleter_type = D;
+};
+
+template <typename R, typename D>
+class unique_resource : public unique_resource_base<R, D>
+{
+private:
+  using base_type = unique_resource_base<R, D>;
+
+  typename base_type::stored_resource_handle_type r_{};
+  typename base_type::deleter_type d_{};
+  bool owns_resource_{};
+
+public:
+  unique_resource() = default;
+
+  template <typename RR, typename DD>
+  unique_resource(RR &&r, DD &&d) noexcept(
+      std::is_nothrow_constructible_v<std::decay_t<R>, R>
+          &&std::is_nothrow_constructible_v<std::decay_t<D>, D>)
+      : r_(std::forward<RR>(r)),
+        d_(std::forward<DD>(d)),
+        owns_resource_(true)
+  {
+  }
+
+  unique_resource(unique_resource &&other)
+      : r_(std::move(other).r_),
+        d_(std::move(other).d_),
+        owns_resource_(detail::exchange(other.owns_resource_, false))
+  {
+  }
+
+  ~unique_resource() noexcept { reset(); }
+
+  /// Releases the ownership of the managed resource if any. The destructor will
+  /// not execute the deleter after the call, unless reset is called later for
+  /// managing new resource.
+  void release() noexcept { owns_resource_ = false; }
+
+  /// Disposes the resource by calling the deleter with the underlying resource
+  /// handle if the unique_resource owns it. The unique_resource does not own
+  /// the resource after the call.
+  void reset() noexcept
+  {
+    if (owns_resource_)
+    {
+      d_(r_);
+      owns_resource_ = false;
+    }
+  }
+
+  template <typename RR>
+  void reset(RR &&r)
+  {
+    if (owns_resource_)
+    {
+      d_(r_);
+      r_ = std::forward<RR>(r);
+    }
+  }
+
+  /// Accesses the underlying resource handle.
+  const R &get() const noexcept { return r_; }
+
+  /// Accesses the deleter object which would be used for disposing the managed
+  /// resource.
+  const D &get_deleter() const noexcept { return d_; }
+
+  /// Access the object or function pointed by the underlying resource handle
+  /// which is a pointer. This function participates in overload resolution only
+  /// if std::is_pointer_v<R> is true and
+  /// std::is_void_v<std::remove_pointer_t<R>> is false. If the resource handle
+  /// is not pointing to an object or a function, the behavior is undefined.
+  std::add_lvalue_reference_t<std::remove_pointer_t<R>>
+  operator*() const noexcept
+  {
+    return *r_;
+  }
+
+  /// Get a copy of the underlying resource handle which is a pointer. This
+  /// function participates in overload resolution only if std::is_pointer_v<R>
+  /// is true. The return value is typically used to access the pointed object.
+  R operator->() const noexcept { return r_; }
+};
+
+/// Creates a unique_resource, initializes its stored resource handle is
+/// initialized with std::forward<R>(r) and its deleter with std::forward<D>(d).
+/// The created unique_resource owns the resource if and only if bool(r ==
+/// invalid) is false.
+template <class R, class D, class S = std::decay_t<R>>
+unique_resource<std::decay_t<R>, std::decay_t<D>> make_unique_resource_checked(
+    R &&r, const S &invalid,
+    D &&d) noexcept(std::is_nothrow_constructible_v<std::decay_t<R>, R>
+                        &&std::is_nothrow_constructible_v<std::decay_t<D>, D>)
+{
+  if (r == invalid)
+    return unique_resource<std::decay_t<R>, std::decay_t<D>>();
+  else
+    return unique_resource<std::decay_t<R>, std::decay_t<D>>(
+        std::forward<R>(r), std::forward<D>(d));
+}
+
+} // namespace gpcl
 
 #endif
